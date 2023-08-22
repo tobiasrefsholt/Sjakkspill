@@ -1,0 +1,53 @@
+body {
+    margin: 0;
+}
+
+#app {
+    min-width: 100vw;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #3d2e21;
+    color: white;
+}
+
+.chess-board-wrapper {
+    display: grid;
+    grid-template-columns: repeat(2, min-content);
+    grid-template-areas: 
+        "y      chess-board"
+        "y      chess-board"
+        "none   x";
+    gap: 1.5rem;
+}
+
+.chess-board {
+    grid-area: chess-board;
+    display: grid;
+    grid-template-columns: repeat(8, 100px);
+    grid-template-rows: repeat(8, 100px);
+    box-shadow: #251b13 0px 8px 24px;
+}
+
+.cell-white {
+    background-color: #F0D9B5;
+}
+
+.cell-black {
+    background-color: #B58863;
+}
+
+.x-axis {
+    grid-area: x;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+}
+
+.y-axis {
+    grid-area: y;
+    display: flex;
+    flex-direction: column-reverse;
+    justify-content: space-around;
+}
