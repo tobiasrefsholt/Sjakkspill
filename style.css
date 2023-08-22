@@ -10,6 +10,7 @@ body {
     justify-content: center;
     background-color: #3d2e21;
     color: white;
+    user-select: none;
 }
 
 .chess-board-wrapper {
