@@ -53,6 +53,18 @@ const movementRules = {
             west: [1,2,3,4,5,6,7],
             northWest: [1,2,3,4,5,6,7],
         },
+    },
+    king: {
+        move: {
+            north: [1],
+            northEast: [1],
+            east: [1],
+            southEast: [1],
+            south: [1],
+            southWest: [1],
+            west: [1],
+            northWest: [1],
+        },
     }
 }
 let piecesPosition = {
