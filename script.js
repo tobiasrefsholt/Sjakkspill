@@ -1,6 +1,7 @@
 // Model
 
 const app = document.getElementById('app');
+const chessBoard = document.getElementById('chess-board');
 const movementRules = {
     pawn: {
         move: {
@@ -67,19 +68,28 @@ const movementRules = {
         },
     }
 }
-let piecesPosition = {
-    a2: {
-        piece: {
-            type: "pawn",
-            color: "white",
-            fistMove: true,
-        }
-    }
+const icons = {
+    pawn: "♟",
+    bishop: "♝",
+    knight: "♞",
+    rook: "♜",
+    queen: "♛",
+    king: "♚"
+
 }
+let piecesState = [];
 
 // View
 
-updateView()
+init();
+
+function init() {
+    // Generer modellen (plasser brikkene i piecesState)
+    resetPieces();
+    // Vis modellen
+    updateView();
+}
+
 
 function updateView() {
     app.innerHTML = /*html*/ `
@@ -89,15 +99,15 @@ function updateView() {
             <div class="y-axis"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span></div>
         </div>
     `
-    placePieces();
+    updatePieces();
 }
 
 function drawBoard() {
     let boardHtml = '';
 
-    boardHtml += /*html*/`<div class="chess-board">`;
+    boardHtml += /*html*/`<div id="chess-board">`;
 
-    for (let rowCount = 0; rowCount < 8; rowCount++) {
+    for (let rowCount = 8; rowCount >= 1; rowCount--) {
         let parity = (rowCount%2 == 0) ? 'even' : 'odd';
         boardHtml += drawBoardRow(parity, rowCount);
     }
@@ -111,11 +121,11 @@ function drawBoardRow(rowParity, rowCount) {
     let html = '';
     let CellParityOffest = 0;
 
-    if (rowParity == 'even') {
+    if (rowParity == 'odd') {
         CellParityOffest = 1;
     }
 
-    for (let colCount = 0; colCount < 8; colCount++) {
+    for (let colCount = 1; colCount <= 8; colCount++) {
         let cellColor = ( (colCount+CellParityOffest) % 2 == 0 ) ? 'black' : 'white';
 
         html += /*html*/`
@@ -126,9 +136,184 @@ function drawBoardRow(rowParity, rowCount) {
     return html;
 }
 
-function placePieces() {
-
+function updatePieces() {
+    for (let i=0; i<piecesState.length; i++) {
+        let piece = piecesState[i];
+        let icon = icons[piece.type];
+        let targetCell = app.querySelector(`.cell[row="${piece.position.y}"][col="${piece.position.x}"]`);
+        targetCell.innerHTML = icon;
+        targetCell.classList.add(`${piece.color}-piece`)
+    }
 }
 
 
 // Controller
+function resetPieces() {
+    piecesState = [];
+
+    resetPawns("white");
+    resetPawns("black");
+
+    // Bishops
+    piecesState.push({
+        position: {
+            x: 3,
+            y: 1
+        },
+        type: "bishop",
+        color: "white"
+    })
+    piecesState.push({
+        position: {
+            x: 6,
+            y: 1
+        },
+        type: "bishop",
+        color: "white"
+    })
+    piecesState.push({
+        position: {
+            x: 3,
+            y: 8
+        },
+        type: "bishop",
+        color: "black"
+    })
+    piecesState.push({
+        position: {
+            x: 6,
+            y: 8
+        },
+        type: "bishop",
+        color: "black"
+    })
+
+    // Knights
+    piecesState.push({
+        position: {
+            x: 2,
+            y: 1
+        },
+        type: "knight",
+        color: "white"
+    })
+    piecesState.push({
+        position: {
+            x: 7,
+            y: 1
+        },
+        type: "knight",
+        color: "white"
+    })
+    piecesState.push({
+        position: {
+            x: 2,
+            y: 8
+        },
+        type: "knight",
+        color: "black"
+    })
+    piecesState.push({
+        position: {
+            x: 7,
+            y: 8
+        },
+        type: "knight",
+        color: "black"
+    })
+
+    // Rooks
+    piecesState.push({
+        position: {
+            x: 1,
+            y: 1
+        },
+        type: "rook",
+        color: "white"
+    })
+    piecesState.push({
+        position: {
+            x: 8,
+            y: 1
+        },
+        type: "rook",
+        color: "white"
+    })
+    piecesState.push({
+        position: {
+            x: 1,
+            y: 8
+        },
+        type: "rook",
+        color: "black"
+    })
+    piecesState.push({
+        position: {
+            x: 8,
+            y: 8
+        },
+        type: "rook",
+        color: "black"
+    })
+
+    // Queens
+    piecesState.push({
+        position: {
+            x: 4,
+            y: 1
+        },
+        type: "queen",
+        color: "white"
+    })
+    piecesState.push({
+        position: {
+            x: 4,
+            y: 8
+        },
+        type: "queen",
+        color: "black"
+    })
+
+    // Kings
+    piecesState.push({
+        position: {
+            x: 5,
+            y: 1
+        },
+        type: "king",
+        color: "white"
+    })
+    piecesState.push({
+        position: {
+            x: 5,
+            y: 8
+        },
+        type: "king",
+        color: "black"
+    })
+
+}
+
+function resetPawns(color) {
+    let targetRow;
+    
+    if (color == "white") {
+        targetRow = 2;
+    } else if (color == "black") {
+        targetRow = 7;
+    } else {
+        return;
+    }
+
+    for (let colCount = 1; colCount <= 8; colCount++) {
+        piecesState.push({
+            position: {
+                x: colCount,
+                y: targetRow
+            },
+            type: "pawn",
+            color: color,
+            fistMove: true,
+        })
+    }
+}

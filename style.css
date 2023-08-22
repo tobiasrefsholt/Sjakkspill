@@ -22,12 +22,18 @@ body {
     gap: 1.5rem;
 }
 
-.chess-board {
+#chess-board {
     grid-area: chess-board;
     display: grid;
     grid-template-columns: repeat(8, 100px);
     grid-template-rows: repeat(8, 100px);
     box-shadow: #251b13 0px 8px 24px;
+}
+
+.cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .cell-white {
@@ -50,4 +56,14 @@ body {
     display: flex;
     flex-direction: column-reverse;
     justify-content: space-around;
+}
+
+.white-piece {
+    color: white;
+    font-size: 70px;
+}
+
+.black-piece {
+    color: black;
+    font-size: 70px;
 }
