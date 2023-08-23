@@ -149,15 +149,17 @@ function updatePiecesView() {
     let activePieceClass = '';
 
     for (let i=0; i<piecesState.length; i++) {
-        let piece = piecesState[i];
-        let icon = icons[piece.type];
-        let targetCell = app.querySelector(`.cell[row="${piece.position.y}"][col="${piece.position.x}"]`);
-        targetCell.innerHTML = icon;
-        targetCell.classList.add(`${piece.color}-piece`);
-        targetCell.setAttribute("piece-index", i);
-        
-        if (i === selectedPieceIndex) {
-            targetCell.classList.add("selected-piece");
+        if (!piecesState[i].disabled) {
+            let piece = piecesState[i];
+            let icon = icons[piece.type];
+            let targetCell = app.querySelector(`.cell[row="${piece.position.y}"][col="${piece.position.x}"]`);
+            targetCell.innerHTML = icon;
+            targetCell.classList.add(`${piece.color}-piece`);
+            targetCell.setAttribute("piece-index", i);
+            
+            if (i === selectedPieceIndex) {
+                targetCell.classList.add("selected-piece");
+            }
         }
     }
 }
@@ -348,17 +350,23 @@ function selectPiece(index) {
 }
 
 function calculateLegalMoves() {
-    currentLegalMoves = [];
     pieceType = piecesState[selectedPieceIndex].type;
-    currentX = piecesState[selectedPieceIndex].position.x;
     currentY = piecesState[selectedPieceIndex].position.y;
 
+    // Definer offsetModifier som 1 eller -1, avhengig av fargen på brikken. Brukes for å snu om på lovlige trekk for svarte brikker.
+    let offsetModifier;
+    if (piecesState[selectedPieceIndex].color == "white") {
+        offsetModifier = 1;
+    } else {
+        offsetModifier = -1;
+    }
+
     if (pieceType == "pawn") {
-        currentLegalMoves = calculateLegalMovesPawn(piecesState[selectedPieceIndex])
+        currentLegalMoves = calculateLegalMovesPawn(piecesState[selectedPieceIndex], offsetModifier);
     }
 }
 
-function calculateLegalMovesPawn(currentPawn) {
+function calculateLegalMovesPawn(currentPawn, offsetModifier) {
 
     let legalMoves = [];
     // Definer hvilke regler som gjelder
@@ -366,8 +374,8 @@ function calculateLegalMovesPawn(currentPawn) {
 
     // Sjekk om bonden har noen å angripe (diagonalt)
     let attackRange = [
-        {x: currentPawn.position.x + 1, y: currentPawn.position.y + 1 },
-        {x: currentPawn.position.x + -1, y: currentPawn.position.y + 1 }
+        {x: currentPawn.position.x + 1 * offsetModifier, y: currentPawn.position.y + 1 * offsetModifier },
+        {x: currentPawn.position.x + -1 * offsetModifier, y: currentPawn.position.y + 1 * offsetModifier }
     ]
     if (getPieceIndexByPosition(attackRange[0])) {
         legalMoves.push(attackRange[0])
@@ -378,10 +386,13 @@ function calculateLegalMovesPawn(currentPawn) {
 
     // Kalkuler lovlige felter etter reglene
     for (let i=0; i<currentMoveRules.north.length; i++) {
-        legalMoves.push({
+        let targetCell = {
             x: currentPawn.position.x,
-            y: currentPawn.position.y + currentMoveRules.north[i]
-        });
+            y: currentPawn.position.y + currentMoveRules.north[i] * offsetModifier
+        };
+        if (!getPieceIndexByPosition(targetCell)) {
+            legalMoves.push(targetCell);
+        }
     }
 
     console.log(legalMoves);
@@ -394,7 +405,7 @@ function getPieceIndexByPosition(position) {
 
     for (let i = 0; i < piecesState.length; i++) {
         
-        if (JSON.stringify(piecesState[i].position) == JSON.stringify(position)) {
+        if (!piecesState[i].disabled && JSON.stringify(piecesState[i].position) == JSON.stringify(position)) {
             return i;
         }
 
@@ -405,7 +416,23 @@ function getPieceIndexByPosition(position) {
 }
 
 function moveToCell(targetPosition) {
-    console.log(`Moving ${piecesState[selectedPieceIndex].type} at x:${piecesState[selectedPieceIndex].position.x}, y:${piecesState[selectedPieceIndex].position.y} to x: ${targetPosition.x}, y: ${targetPosition.y}`)
+    //console.log(`Moving ${piecesState[selectedPieceIndex].type} at x:${piecesState[selectedPieceIndex].position.x}, y:${piecesState[selectedPieceIndex].position.y} to x: ${targetPosition.x}, y: ${targetPosition.y}`);
+
+    let pieceToRemove;
+    if (targetPositionIndex = getPieceIndexByPosition(targetPosition)) {
+        piecesState[targetPositionIndex].disabled = true;
+    }
+    console.log("Piece to remove: " + targetPositionIndex);
+
+    piecesState[selectedPieceIndex].position.x = targetPosition.x;
+    piecesState[selectedPieceIndex].position.y = targetPosition.y;
+
+    piecesState[selectedPieceIndex].firstMove = false;
+
+    selectedPieceIndex = false;
+    currentLegalMoves = false;
+    updateView();
+
 }
 
 function addEventListenersOnPieces() {
