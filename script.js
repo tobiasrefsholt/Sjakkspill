@@ -94,22 +94,23 @@ function init() {
 function updateView() {
     app.innerHTML = /*html*/ `
         <div class="chess-board-wrapper">
-            ${drawBoard()}
+            ${boardView()}
             <div class="x-axis"><span>A</span><span>B</span><span>C</span><span>D</span><span>E</span><span>F</span><span>G</span><span>H</span></div>
             <div class="y-axis"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span></div>
         </div>
     `
-    updatePieces();
+    updatePiecesView();
+    addEventListenersOnPieces();
 }
 
-function drawBoard() {
+function boardView() {
     let boardHtml = '';
 
     boardHtml += /*html*/`<div id="chess-board">`;
 
     for (let rowCount = 8; rowCount >= 1; rowCount--) {
         let parity = (rowCount%2 == 0) ? 'even' : 'odd';
-        boardHtml += drawBoardRow(parity, rowCount);
+        boardHtml += boardRowView(parity, rowCount);
     }
 
     boardHtml += /*html*/`</div>`;
@@ -117,7 +118,7 @@ function drawBoard() {
     return boardHtml;
 }
 
-function drawBoardRow(rowParity, rowCount) {
+function boardRowView(rowParity, rowCount) {
     let html = '';
     let CellParityOffest = 0;
 
@@ -136,13 +137,15 @@ function drawBoardRow(rowParity, rowCount) {
     return html;
 }
 
-function updatePieces() {
+function updatePiecesView() {
     for (let i=0; i<piecesState.length; i++) {
         let piece = piecesState[i];
         let icon = icons[piece.type];
         let targetCell = app.querySelector(`.cell[row="${piece.position.y}"][col="${piece.position.x}"]`);
         targetCell.innerHTML = icon;
-        targetCell.classList.add(`${piece.color}-piece`)
+        targetCell.classList.add(`${piece.color}-piece`);
+        targetCell.setAttribute("piece-index", i);
+        /* targetCell.id = i; */
     }
 }
 
@@ -316,4 +319,22 @@ function resetPawns(color) {
             fistMove: true,
         })
     }
+}
+
+function selectPiece(index) {
+    console.log(piecesState[index]);
+}
+
+function addEventListenersOnPieces() {
+    document.querySelectorAll('.cell').forEach(cell => {
+
+        cell.addEventListener("click", function (event) {
+            let index = parseInt(this.getAttribute("piece-index"));
+            if (!index && index !== 0) {
+                return;
+            }
+            selectPiece(index);
+        });
+
+    })
 }
