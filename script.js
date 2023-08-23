@@ -79,6 +79,7 @@ const icons = {
 }
 let piecesState = [];
 let selectedPieceIndex;
+let currentLegalMoves;
 
 // View
 
@@ -130,9 +131,15 @@ function boardRowView(rowParity, rowCount) {
     for (let colCount = 1; colCount <= 8; colCount++) {
         let cellColor = ( (colCount+CellParityOffest) % 2 == 0 ) ? 'black' : 'white';
 
-        html += /*html*/`
-        <div class="cell cell-${cellColor}" row="${rowCount}" col="${colCount}"></div>
-        `;
+        if (currentLegalMoves && currentLegalMoves.some(position => position.x == colCount && position.y == rowCount)) {
+            html += /*html*/`
+            <div class="cell cell-legal-move" row="${rowCount}" col="${colCount}"></div>
+            `;
+        } else {
+            html += /*html*/`
+            <div class="cell cell-${cellColor}" row="${rowCount}" col="${colCount}"></div>
+            `;
+        }
     }
 
     return html;
@@ -330,6 +337,7 @@ function resetPawns(color) {
 function selectPiece(index) {
     if (!index && index !== 0) {
         selectedPieceIndex = '';
+        currentLegalMoves = [];
         updateView();
         return;
     }
@@ -340,12 +348,13 @@ function selectPiece(index) {
 }
 
 function calculateLegalMoves() {
+    currentLegalMoves = [];
     pieceType = piecesState[selectedPieceIndex].type;
     currentX = piecesState[selectedPieceIndex].position.x;
     currentY = piecesState[selectedPieceIndex].position.y;
 
     if (pieceType == "pawn") {
-        calculateLegalMovesPawn(piecesState[selectedPieceIndex])
+        currentLegalMoves = calculateLegalMovesPawn(piecesState[selectedPieceIndex])
     }
 }
 
@@ -375,6 +384,8 @@ function calculateLegalMovesPawn(currentPawn) {
         });
     }
 
+    console.log(legalMoves);
+
     return legalMoves;
     
 }
@@ -393,13 +404,26 @@ function getPieceIndexByPosition(position) {
 
 }
 
+function moveToCell(targetPosition) {
+    console.log(`Moving ${piecesState[selectedPieceIndex].type} at x:${piecesState[selectedPieceIndex].position.x}, y:${piecesState[selectedPieceIndex].position.y} to x: ${targetPosition.x}, y: ${targetPosition.y}`)
+}
+
 function addEventListenersOnPieces() {
-    document.querySelectorAll('.cell').forEach(cell => {
+    document.querySelectorAll('.cell:not(.cell-legal-move)').forEach(cell => {
 
         cell.addEventListener("click", function (event) {
             let index = parseInt(this.getAttribute("piece-index"));
             selectPiece(index);
         });
 
-    })
+    });
+
+    document.querySelectorAll('.cell-legal-move').forEach(cell => {
+
+        cell.addEventListener("click", function (event) {
+            let targetPosition = {x: parseInt(this.getAttribute("col")), y: parseInt(this.getAttribute("row"))};
+            moveToCell(targetPosition);
+        });
+
+    });
 }

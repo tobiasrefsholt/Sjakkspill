@@ -72,3 +72,7 @@ body {
 .selected-piece {
     border: solid black 3px;
 }
+
+.cell-legal-move {
+    background-color: lightgreen;
+}
