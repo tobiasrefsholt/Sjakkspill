@@ -78,7 +78,7 @@ const icons = {
 
 }
 let piecesState = [];
-let selectedPiece;
+let selectedPieceIndex;
 
 // View
 
@@ -149,7 +149,7 @@ function updatePiecesView() {
         targetCell.classList.add(`${piece.color}-piece`);
         targetCell.setAttribute("piece-index", i);
         
-        if (i === selectedPiece) {
+        if (i === selectedPieceIndex) {
             targetCell.classList.add("selected-piece");
         }
     }
@@ -322,20 +322,75 @@ function resetPawns(color) {
             },
             type: "pawn",
             color: color,
-            fistMove: true,
+            firstMove: true,
         })
     }
 }
 
 function selectPiece(index) {
     if (!index && index !== 0) {
-        selectedPiece = '';
+        selectedPieceIndex = '';
         updateView();
         return;
     }
 
-    selectedPiece = index;
+    selectedPieceIndex = index;
+    calculateLegalMoves();
     updateView();
+}
+
+function calculateLegalMoves() {
+    pieceType = piecesState[selectedPieceIndex].type;
+    currentX = piecesState[selectedPieceIndex].position.x;
+    currentY = piecesState[selectedPieceIndex].position.y;
+
+    if (pieceType == "pawn") {
+        calculateLegalMovesPawn(piecesState[selectedPieceIndex])
+    }
+}
+
+function calculateLegalMovesPawn(currentPawn) {
+
+    let legalMoves = [];
+    // Definer hvilke regler som gjelder
+    let currentMoveRules = currentPawn.firstMove ? movementRules.pawn.firstMove : movementRules.pawn.move;
+
+    // Sjekk om bonden har noen å angripe (diagonalt)
+    let attackRange = [
+        {x: currentPawn.position.x + 1, y: currentPawn.position.y + 1 },
+        {x: currentPawn.position.x + -1, y: currentPawn.position.y + 1 }
+    ]
+    if (getPieceIndexByPosition(attackRange[0])) {
+        legalMoves.push(attackRange[0])
+    }
+    if (getPieceIndexByPosition(attackRange[1])) {
+        legalMoves.push(attackRange[1])
+    }
+
+    // Kalkuler lovlige felter etter reglene
+    for (let i=0; i<currentMoveRules.north.length; i++) {
+        legalMoves.push({
+            x: currentPawn.position.x,
+            y: currentPawn.position.y + currentMoveRules.north[i]
+        });
+    }
+
+    return legalMoves;
+    
+}
+
+function getPieceIndexByPosition(position) {
+
+    for (let i = 0; i < piecesState.length; i++) {
+        
+        if (JSON.stringify(piecesState[i].position) == JSON.stringify(position)) {
+            return i;
+        }
+
+    }
+
+    return false;
+
 }
 
 function addEventListenersOnPieces() {
