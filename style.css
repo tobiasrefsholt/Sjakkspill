@@ -68,3 +68,7 @@ body {
     color: black;
     font-size: 70px;
 }
+
+.selected-piece {
+    border: solid black 3px;
+}

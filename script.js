@@ -78,6 +78,7 @@ const icons = {
 
 }
 let piecesState = [];
+let selectedPiece;
 
 // View
 
@@ -138,6 +139,8 @@ function boardRowView(rowParity, rowCount) {
 }
 
 function updatePiecesView() {
+    let activePieceClass = '';
+
     for (let i=0; i<piecesState.length; i++) {
         let piece = piecesState[i];
         let icon = icons[piece.type];
@@ -145,7 +148,10 @@ function updatePiecesView() {
         targetCell.innerHTML = icon;
         targetCell.classList.add(`${piece.color}-piece`);
         targetCell.setAttribute("piece-index", i);
-        /* targetCell.id = i; */
+        
+        if (i === selectedPiece) {
+            targetCell.classList.add("selected-piece");
+        }
     }
 }
 
@@ -322,7 +328,14 @@ function resetPawns(color) {
 }
 
 function selectPiece(index) {
-    console.log(piecesState[index]);
+    if (!index && index !== 0) {
+        selectedPiece = '';
+        updateView();
+        return;
+    }
+
+    selectedPiece = index;
+    updateView();
 }
 
 function addEventListenersOnPieces() {
@@ -330,9 +343,6 @@ function addEventListenersOnPieces() {
 
         cell.addEventListener("click", function (event) {
             let index = parseInt(this.getAttribute("piece-index"));
-            if (!index && index !== 0) {
-                return;
-            }
             selectPiece(index);
         });
 
