@@ -377,10 +377,10 @@ function calculateLegalMovesPawn(currentPawn, offsetModifier) {
         {x: currentPawn.position.x + 1 * offsetModifier, y: currentPawn.position.y + 1 * offsetModifier },
         {x: currentPawn.position.x + -1 * offsetModifier, y: currentPawn.position.y + 1 * offsetModifier }
     ]
-    if (getPieceIndexByPosition(attackRange[0])) {
+    if ( currenPieceCanAttack(attackRange[0]) ) {
         legalMoves.push(attackRange[0])
     }
-    if (getPieceIndexByPosition(attackRange[1])) {
+    if ( currenPieceCanAttack(attackRange[1]) ) {
         legalMoves.push(attackRange[1])
     }
 
@@ -401,6 +401,36 @@ function calculateLegalMovesPawn(currentPawn, offsetModifier) {
     
 }
 
+// Returns false if field is occupied, and piece color if occupied
+
+function fieldIsOccupied(targetCell) {
+
+    let targetPiece = getPieceIndexByPosition(targetCell)
+    
+    if (!targetPiece) {
+        return false;
+    }
+
+    return targetPiece.color;
+
+}
+
+function currenPieceCanAttack(target) {
+
+    if (!piecesState[getPieceIndexByPosition(target)]) {
+        return false;
+    }
+
+    let currentPiece = piecesState[selectedPieceIndex];
+    let targetPiece = piecesState[getPieceIndexByPosition(target)];
+
+    if (targetPiece.color == currentPiece.color) {
+        return false;
+    }
+
+    return true;
+}
+
 function getPieceIndexByPosition(position) {
 
     for (let i = 0; i < piecesState.length; i++) {
@@ -416,9 +446,10 @@ function getPieceIndexByPosition(position) {
 }
 
 function moveToCell(targetPosition) {
-    //console.log(`Moving ${piecesState[selectedPieceIndex].type} at x:${piecesState[selectedPieceIndex].position.x}, y:${piecesState[selectedPieceIndex].position.y} to x: ${targetPosition.x}, y: ${targetPosition.y}`);
+    console.log(`Moving ${piecesState[selectedPieceIndex].color} ${piecesState[selectedPieceIndex].type} at x:${piecesState[selectedPieceIndex].position.x}, y:${piecesState[selectedPieceIndex].position.y} to x: ${targetPosition.x}, y: ${targetPosition.y}`);
 
-    let pieceToRemove;
+    let targetPositionIndex;
+    
     if (targetPositionIndex = getPieceIndexByPosition(targetPosition)) {
         piecesState[targetPositionIndex].disabled = true;
     }
