@@ -2,72 +2,6 @@
 
 const app = document.getElementById('app');
 const chessBoard = document.getElementById('chess-board');
-const movementRules = {
-    pawn: {
-        move: {
-            north: [1],
-        },
-        firstMove: {
-            north: [1,2],
-        },
-        attack: {
-            northEast: [1],
-            northWest: [1],
-        },
-    },
-    bishop: {
-        move: {
-            northEast: [1,2,3,4,5,6,7],
-            southEast: [1,2,3,4,5,6,7],
-            southWest: [1,2,3,4,5,6,7],
-            northWest: [1,2,3,4,5,6,7],
-        },
-    },
-    knight: {
-        possibleMoves: [
-            {xOffest: 2, yOffset: 1},
-            {xOffest: 1, yOffset: 2},
-            {xOffest: -1, yOffset: 2},
-            {xOffest: -2, yOffset: 1},
-            {xOffest: -2, yOffset: -1},
-            {xOffest: -1, yOffset: -2},
-            {xOffest: 1, yOffset: -2},
-            {xOffest: 2, yOffset: -1},
-        ]
-    },
-    rook: {
-        move: {
-            north: [1,2,3,4,5,6,7],
-            east: [1,2,3,4,5,6,7],
-            south: [1,2,3,4,5,6,7],
-            west: [1,2,3,4,5,6,7],
-        },
-    },
-    queen: {
-        move: {
-            north: [1,2,3,4,5,6,7],
-            northEast: [1,2,3,4,5,6,7],
-            east: [1,2,3,4,5,6,7],
-            southEast: [1,2,3,4,5,6,7],
-            south: [1,2,3,4,5,6,7],
-            southWest: [1,2,3,4,5,6,7],
-            west: [1,2,3,4,5,6,7],
-            northWest: [1,2,3,4,5,6,7],
-        },
-    },
-    king: {
-        move: {
-            north: [1],
-            northEast: [1],
-            east: [1],
-            southEast: [1],
-            south: [1],
-            southWest: [1],
-            west: [1],
-            northWest: [1],
-        },
-    }
-}
 const icons = {
     pawn: "♟",
     bishop: "♝",
@@ -385,7 +319,7 @@ function calculateLegalMovesPawn(currentPawn) {
 
     let legalMoves = [];
     // Definer hvilke regler som gjelder
-    let currentMoveRules = currentPawn.firstMove ? movementRules.pawn.firstMove : movementRules.pawn.move;
+    let currentRange = currentPawn.firstMove ? [1,2] : [1];
 
     // Definer offsetModifier som 1 eller -1, avhengig av fargen på brikken. Brukes for å snu om på lovlige trekk for svarte brikker.
     let offsetModifier;
@@ -408,10 +342,10 @@ function calculateLegalMovesPawn(currentPawn) {
     }
 
     // Kalkuler lovlige felter etter reglene
-    for (let i=0; i<currentMoveRules.north.length; i++) {
+    for (let i=0; i<currentRange.length; i++) {
         let targetCell = {
             x: currentPawn.position.x,
-            y: currentPawn.position.y + currentMoveRules.north[i] * offsetModifier
+            y: currentPawn.position.y + currentRange[i] * offsetModifier
         };
         if (!getPieceIndexByPosition(targetCell)) {
             legalMoves.push(targetCell);
