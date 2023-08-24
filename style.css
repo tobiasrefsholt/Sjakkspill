@@ -17,9 +17,10 @@ body {
     display: grid;
     grid-template-columns: repeat(2, min-content);
     grid-template-areas: 
+        ".      header"
         "y      chess-board"
         "y      chess-board"
-        "none   x";
+        ".      x";
     gap: 1.5rem;
 }
 
@@ -43,6 +44,12 @@ body {
 
 .cell-black {
     background-color: #B58863;
+}
+
+.show-turn {
+    grid-area: header;
+    text-align: center;
+    text-transform: capitalize;
 }
 
 .x-axis {

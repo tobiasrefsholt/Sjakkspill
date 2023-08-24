@@ -80,6 +80,7 @@ const icons = {
 let piecesState = [];
 let selectedPieceIndex;
 let currentLegalMoves;
+let currentTeam = "white";
 
 // View
 
@@ -96,6 +97,7 @@ function init() {
 function updateView() {
     app.innerHTML = /*html*/ `
         <div class="chess-board-wrapper">
+            <h1 class="show-turn">${currentTeam}'s turn</h1>
             ${boardView()}
             <div class="x-axis"><span>A</span><span>B</span><span>C</span><span>D</span><span>E</span><span>F</span><span>G</span><span>H</span></div>
             <div class="y-axis"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span></div>
@@ -337,7 +339,8 @@ function resetPawns(color) {
 }
 
 function selectPiece(index) {
-    if (!index && index !== 0) {
+    // If empty cell or enemy piece, reset variables and update view
+    if ( !index && index !== 0 || piecesState[index].color !== currentTeam ) {
         selectedPieceIndex = '';
         currentLegalMoves = [];
         updateView();
@@ -449,7 +452,7 @@ function moveToCell(targetPosition) {
     console.log(`Moving ${piecesState[selectedPieceIndex].color} ${piecesState[selectedPieceIndex].type} at x:${piecesState[selectedPieceIndex].position.x}, y:${piecesState[selectedPieceIndex].position.y} to x: ${targetPosition.x}, y: ${targetPosition.y}`);
 
     let targetPositionIndex;
-    
+
     if (targetPositionIndex = getPieceIndexByPosition(targetPosition)) {
         piecesState[targetPositionIndex].disabled = true;
     }
@@ -462,6 +465,7 @@ function moveToCell(targetPosition) {
 
     selectedPieceIndex = false;
     currentLegalMoves = false;
+    (currentTeam == "white") ? currentTeam = "black" : currentTeam = "white";
     updateView();
 
 }
@@ -472,6 +476,7 @@ function addEventListenersOnPieces() {
         cell.addEventListener("click", function (event) {
             let index = parseInt(this.getAttribute("piece-index"));
             selectPiece(index);
+            // If empty cell, reset variables and update view
         });
 
     });
