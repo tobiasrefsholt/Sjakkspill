@@ -354,19 +354,28 @@ function selectPiece(index) {
 
 function calculateLegalMoves() {
     pieceType = piecesState[selectedPieceIndex].type;
+    let moves;
+    currentLegalMoves = [];
 
     if (pieceType == "pawn") {
-        currentLegalMoves = calculateLegalMovesPawn(piecesState[selectedPieceIndex]);
+        moves = calculateLegalMovesPawn(piecesState[selectedPieceIndex]);
     } else if (pieceType == "bishop") {
-        currentLegalMoves = calculateLegalMovesBishop(piecesState[selectedPieceIndex]);
+        moves = calculateLegalMovesBishop(piecesState[selectedPieceIndex]);
     } else if (pieceType == "knight") {
-        currentLegalMoves = calculateLegalMovesKnight(piecesState[selectedPieceIndex]);
+        moves = calculateLegalMovesKnight(piecesState[selectedPieceIndex]);
     } else if (pieceType == "rook") {
-        currentLegalMoves = calculateLegalMovesRook(piecesState[selectedPieceIndex]);
+        moves = calculateLegalMovesRook(piecesState[selectedPieceIndex]);
     } else if (pieceType == "queen") {
-        currentLegalMoves = calculateLegalMovesQueen(piecesState[selectedPieceIndex]);
+        moves = calculateLegalMovesQueen(piecesState[selectedPieceIndex]);
     } else if (pieceType == "king") {
-        currentLegalMoves = calculateLegalMovesKing(piecesState[selectedPieceIndex]);
+        moves = calculateLegalMovesKing(piecesState[selectedPieceIndex]);
+    }
+
+    // Remove fields outside board
+    for (let i=0; i<moves.length; i++) {
+        if ((moves[i].x <= 8) && (moves[i].x > 0) && (moves[i].y <= 8) && (moves[i].y > 0)) {
+            currentLegalMoves.push(moves[i]);
+        }
     }
 
     console.log(currentLegalMoves);
@@ -423,18 +432,73 @@ function calculateLegalMovesBishop(currentBishop) {
 
 function calculateLegalMovesKnight(currentKnight) {
 
+    let legalMoves = [];
+    let possibleMoves = [
+        { x: currentKnight.position.x + 2, y: currentKnight.position.y + 1 },
+        { x: currentKnight.position.x + 1, y: currentKnight.position.y + 2 },
+        { x: currentKnight.position.x - 1, y: currentKnight.position.y + 2 },
+        { x: currentKnight.position.x - 2, y: currentKnight.position.y + 1 },
+        { x: currentKnight.position.x - 2, y: currentKnight.position.y - 1 },
+        { x: currentKnight.position.x - 1, y: currentKnight.position.y - 2 },
+        { x: currentKnight.position.x + 1, y: currentKnight.position.y - 2 },
+        { x: currentKnight.position.x + 2, y: currentKnight.position.y - 1 },
+    ];
+
+    for (let i=0; i<possibleMoves.length; i++) {
+
+        if (fieldIsOccupied(possibleMoves[i]) != currentKnight.color) {
+            legalMoves.push(possibleMoves[i]);
+        }
+
+    }
+
+    return legalMoves;
 }
 
 function calculateLegalMovesRook(currentRook) {
+
+    let northSouth = calculateFieldsNorthSouth(currentRook);
+    let eastWest = calculateFieldsEastWest(currentRook);
+    let legalMoves = northSouth.concat(eastWest);
+
+    return legalMoves;
 
 }
 
 function calculateLegalMovesQueen(currentQueen) {
 
+    let northSouth = calculateFieldsNorthSouth(currentQueen);
+    let eastWest = calculateFieldsEastWest(currentQueen);
+    let diagonals = calculateFieldsDiagonals(currentQueen);
+    let legalMoves = northSouth.concat(eastWest, diagonals);
+
+    return legalMoves;
 }
 
-function calculateLegalMovesKing(currentQueen) {
+function calculateLegalMovesKing(currentKing) {
 
+    let legalMoves = [];
+    let possibleMoves = [
+        { x: currentKing.position.x, y: currentKing.position.y + 1 },
+        { x: currentKing.position.x + 1, y: currentKing.position.y + 1 },
+        { x: currentKing.position.x + 1, y: currentKing.position.y},
+        { x: currentKing.position.x + 1, y: currentKing.position.y - 1 },
+        { x: currentKing.position.x, y: currentKing.position.y - 1},
+        { x: currentKing.position.x - 1, y: currentKing.position.y - 1 },
+        { x: currentKing.position.x - 1, y: currentKing.position.y },
+        { x: currentKing.position.x - 1, y: currentKing.position.y + 1 },
+    ];
+
+    for (let i=0; i<possibleMoves.length; i++) {
+
+        if (fieldIsOccupied(possibleMoves[i]) != currentKing.color) {
+            legalMoves.push(possibleMoves[i]);
+        }
+
+    }
+
+    return legalMoves;
+    
 }
 
 function calculateFieldsDiagonals(piece) {
@@ -501,11 +565,75 @@ function calculateFieldsDiagonals(piece) {
 
 }
 
-function calculateFieldsNorthSouth(position) {
+function calculateFieldsNorthSouth(piece) {
+
+    let legalMoves = [];
+
+    // North
+    for (let i=1; i<=7; i++) {
+        let targetCell = {};
+        targetCell.x = piece.position.x;
+        targetCell.y = piece.position.y + i;
+        if (fieldIsOccupied(targetCell) == piece.color) {
+            break;
+        }
+        legalMoves.push(targetCell);
+        if (fieldIsOccupied(targetCell)) {
+            break;
+        }
+    }
+
+    // South
+    for (let i=1; i<=7; i++) {
+        let targetCell = {};
+        targetCell.x = piece.position.x;
+        targetCell.y = piece.position.y - i;
+        if (fieldIsOccupied(targetCell) == piece.color) {
+            break;
+        }
+        legalMoves.push(targetCell);
+        if (fieldIsOccupied(targetCell)) {
+            break;
+        }
+    }
+
+    return legalMoves;
 
 }
 
-function calculateFieldsEastVest(position) {
+function calculateFieldsEastWest(piece) {
+
+    let legalMoves = [];
+
+    // East
+    for (let i=1; i<=7; i++) {
+        let targetCell = {};
+        targetCell.x = piece.position.x + i;
+        targetCell.y = piece.position.y;
+        if (fieldIsOccupied(targetCell) == piece.color) {
+            break;
+        }
+        legalMoves.push(targetCell);
+        if (fieldIsOccupied(targetCell)) {
+            break;
+        }
+    }
+
+    // West
+    for (let i=1; i<=7; i++) {
+        let targetCell = {};
+        targetCell.x = piece.position.x - i;
+        targetCell.y = piece.position.y;
+        if (fieldIsOccupied(targetCell) == piece.color) {
+            break;
+        }
+        legalMoves.push(targetCell);
+        if (fieldIsOccupied(targetCell)) {
+            break;
+        }
+    }
+
+    return legalMoves;
 
 }
 
