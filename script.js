@@ -354,7 +354,29 @@ function selectPiece(index) {
 
 function calculateLegalMoves() {
     pieceType = piecesState[selectedPieceIndex].type;
-    currentY = piecesState[selectedPieceIndex].position.y;
+
+    if (pieceType == "pawn") {
+        currentLegalMoves = calculateLegalMovesPawn(piecesState[selectedPieceIndex]);
+    } else if (pieceType == "bishop") {
+        currentLegalMoves = calculateLegalMovesBishop(piecesState[selectedPieceIndex]);
+    } else if (pieceType == "knight") {
+        currentLegalMoves = calculateLegalMovesKnight(piecesState[selectedPieceIndex]);
+    } else if (pieceType == "rook") {
+        currentLegalMoves = calculateLegalMovesRook(piecesState[selectedPieceIndex]);
+    } else if (pieceType == "queen") {
+        currentLegalMoves = calculateLegalMovesQueen(piecesState[selectedPieceIndex]);
+    } else if (pieceType == "king") {
+        currentLegalMoves = calculateLegalMovesKing(piecesState[selectedPieceIndex]);
+    }
+
+    console.log(currentLegalMoves);
+}
+
+function calculateLegalMovesPawn(currentPawn) {
+
+    let legalMoves = [];
+    // Definer hvilke regler som gjelder
+    let currentMoveRules = currentPawn.firstMove ? movementRules.pawn.firstMove : movementRules.pawn.move;
 
     // Definer offsetModifier som 1 eller -1, avhengig av fargen på brikken. Brukes for å snu om på lovlige trekk for svarte brikker.
     let offsetModifier;
@@ -363,17 +385,6 @@ function calculateLegalMoves() {
     } else {
         offsetModifier = -1;
     }
-
-    if (pieceType == "pawn") {
-        currentLegalMoves = calculateLegalMovesPawn(piecesState[selectedPieceIndex], offsetModifier);
-    }
-}
-
-function calculateLegalMovesPawn(currentPawn, offsetModifier) {
-
-    let legalMoves = [];
-    // Definer hvilke regler som gjelder
-    let currentMoveRules = currentPawn.firstMove ? movementRules.pawn.firstMove : movementRules.pawn.move;
 
     // Sjekk om bonden har noen å angripe (diagonalt)
     let attackRange = [
@@ -398,10 +409,104 @@ function calculateLegalMovesPawn(currentPawn, offsetModifier) {
         }
     }
 
-    console.log(legalMoves);
-
     return legalMoves;
     
+}
+
+function calculateLegalMovesBishop(currentBishop) {
+
+    let legalMoves = calculateFieldsDiagonals(currentBishop);
+
+    return legalMoves;
+
+}
+
+function calculateLegalMovesKnight(currentKnight) {
+
+}
+
+function calculateLegalMovesRook(currentRook) {
+
+}
+
+function calculateLegalMovesQueen(currentQueen) {
+
+}
+
+function calculateLegalMovesKing(currentQueen) {
+
+}
+
+function calculateFieldsDiagonals(piece) {
+
+    let legalMoves = [];
+
+    // North-east
+    for (let i=1; i<=7; i++) {    
+        let targetCell = {};
+        targetCell.x = piece.position.x + i;
+        targetCell.y = piece.position.y + i;
+        if (fieldIsOccupied(targetCell) == piece.color) {
+            break;
+        }
+        legalMoves.push(targetCell);
+        if (fieldIsOccupied(targetCell)) {
+            break;
+        }
+    }
+
+    // South-east
+    for (let i=1; i<=7; i++) {
+        let targetCell = {};
+        targetCell.x = piece.position.x + i;
+        targetCell.y = piece.position.y - i;
+        if (fieldIsOccupied(targetCell) == piece.color) {
+            break;
+        }
+        legalMoves.push(targetCell);
+        if (fieldIsOccupied(targetCell)) {
+            break;
+        }
+    }
+
+    // South-west
+    for (let i=1; i<=7; i++) {
+        let targetCell = {};
+        targetCell.x = piece.position.x - i;
+        targetCell.y = piece.position.y - i;
+        if (fieldIsOccupied(targetCell) == piece.color) {
+            break;
+        }
+        legalMoves.push(targetCell);
+        if (fieldIsOccupied(targetCell)) {
+            break;
+        }
+    }
+
+    // North-west
+    for (let i=1; i<=7; i++) {
+        let targetCell = {};
+        targetCell.x = piece.position.x - i;
+        targetCell.y = piece.position.y + i;
+        if (fieldIsOccupied(targetCell) == piece.color) {
+            break;
+        }
+        legalMoves.push(targetCell);
+        if (fieldIsOccupied(targetCell)) {
+            break;
+        }
+    }
+
+    return legalMoves;
+
+}
+
+function calculateFieldsNorthSouth(position) {
+
+}
+
+function calculateFieldsEastVest(position) {
+
 }
 
 // Returns false if field is occupied, and piece color if occupied
@@ -414,7 +519,7 @@ function fieldIsOccupied(targetCell) {
         return false;
     }
 
-    return targetPiece.color;
+    return piecesState[targetPiece].color;
 
 }
 
