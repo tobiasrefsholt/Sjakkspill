@@ -307,7 +307,7 @@ function calculateLegalMoves() {
 
     // Remove fields outside board
     for (let i=0; i<moves.length; i++) {
-        if ((moves[i].x <= 8) && (moves[i].x > 0) && (moves[i].y <= 8) && (moves[i].y > 0)) {
+        if ((moves[i].x <= 8) && (moves[i].x >= 0) && (moves[i].y <= 8) && (moves[i].y >= 0)) {
             currentLegalMoves.push(moves[i]);
         }
     }
@@ -577,7 +577,7 @@ function fieldIsOccupied(targetCell) {
 
     let targetPiece = getPieceIndexByPosition(targetCell)
     
-    if (!targetPiece) {
+    if (!targetPiece && targetPiece !== 0) {
         return false;
     }
 
