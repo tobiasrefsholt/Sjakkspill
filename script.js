@@ -640,7 +640,7 @@ function moveToCell(targetPosition) {
 function addEventListenersOnPieces() {
     document.querySelectorAll('.cell:not(.cell-legal-move)').forEach(cell => {
 
-        cell.addEventListener("click", function (event) {
+        cell.addEventListener("mousedown", function (event) {
             let index = parseInt(this.getAttribute("piece-index"));
             selectPiece(index);
             // If empty cell, reset variables and update view
@@ -650,7 +650,7 @@ function addEventListenersOnPieces() {
 
     document.querySelectorAll('.cell-legal-move').forEach(cell => {
 
-        cell.addEventListener("click", function (event) {
+        cell.addEventListener("mouseup", function (event) {
             let targetPosition = {x: parseInt(this.getAttribute("col")), y: parseInt(this.getAttribute("row"))};
             moveToCell(targetPosition);
         });
