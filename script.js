@@ -35,10 +35,40 @@ function updateView() {
             ${boardView()}
             <div class="x-axis"><span>A</span><span>B</span><span>C</span><span>D</span><span>E</span><span>F</span><span>G</span><span>H</span></div>
             <div class="y-axis"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span></div>
+            <div class="sidebar">
+                ${disabledPiecesHTML("white")}
+                ${disabledPiecesHTML("black")}
+            </div>
         </div>
     `
     updatePiecesView();
     addEventListenersOnPieces();
+}
+
+function disabledPiecesHTML(color) {
+
+    if (!getDisabledPiecesIndex(color)) {
+        return;
+    }
+
+    let disabledPiecesIndex = getDisabledPiecesIndex(color);
+    let pieceClass = `${color}-piece`;
+
+    let html = /*html*/`
+        <div class="disabled-${color}">
+    `;
+
+    for (let i=0; i<disabledPiecesIndex.length; i++) {
+        html += /*html*/`
+            <div class="${pieceClass}" piece-index="${disabledPiecesIndex[i]}">
+                ${icons[piecesState[disabledPiecesIndex[i]].type]}
+            </div>
+        `;
+    }
+
+    html += `</div>`;
+
+    return html;
 }
 
 function boardView() {
@@ -334,10 +364,10 @@ function calculateLegalMovesPawn(currentPawn) {
         {x: currentPawn.position.x + 1 * offsetModifier, y: currentPawn.position.y + 1 * offsetModifier },
         {x: currentPawn.position.x + -1 * offsetModifier, y: currentPawn.position.y + 1 * offsetModifier }
     ]
-    if ( currenPieceCanAttack(attackRange[0]) ) {
+    if ( currentPieceCanAttack(attackRange[0]) ) {
         legalMoves.push(attackRange[0])
     }
-    if ( currenPieceCanAttack(attackRange[1]) ) {
+    if ( currentPieceCanAttack(attackRange[1]) ) {
         legalMoves.push(attackRange[1])
     }
 
@@ -585,7 +615,7 @@ function fieldIsOccupied(targetCell) {
 
 }
 
-function currenPieceCanAttack(target) {
+function currentPieceCanAttack(target) {
 
     if (!piecesState[getPieceIndexByPosition(target)]) {
         return false;
@@ -613,6 +643,20 @@ function getPieceIndexByPosition(position) {
 
     return false;
 
+}
+
+function getDisabledPiecesIndex(color) {
+    let disabledPieces = [];
+
+    for (let i = 0; i < piecesState.length; i++) {
+        
+        if (piecesState[i].disabled && piecesState[i].color == color) {
+            disabledPieces.push(i);
+        }
+
+    }
+
+    return disabledPieces;
 }
 
 function moveToCell(targetPosition) {
