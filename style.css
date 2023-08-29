@@ -15,7 +15,8 @@ body {
 
 .chess-board-wrapper {
     display: grid;
-    grid-template-columns: min-content min-content 500px;
+    grid-template-columns: min-content 70vh 30rem;
+    grid-template-rows: min-content 70vh min-content;
     grid-template-areas: 
         ".      header          .      "
         "y      chess-board     sidebar"
@@ -27,7 +28,7 @@ body {
     grid-area: sidebar;
     display: grid;
     grid-template-columns: 1fr;
-    grid-template-rows: 150px 1fr 150px;
+    grid-template-rows: 8rem 1fr 8rem;
     grid-template-areas:
         "disabled-white"
         "."
@@ -64,19 +65,19 @@ body {
 #chess-board {
     grid-area: chess-board;
     display: grid;
-    grid-template-columns: repeat(8, 100px);
-    grid-template-rows: repeat(8, 100px);
+    grid-template-columns: repeat(8, 1fr);
+    grid-template-rows: repeat(8, 1fr);
     box-shadow: #251b13 0px 8px 24px;
 }
 
     #chess-board .white-piece {
         color: white;
-        font-size: 70px;
+        font-size: 6vh;
     }
 
     #chess-board .black-piece {
         color: black;
-        font-size: 70px;
+        font-size: 6vh;
     }
 
     #chess-board .selected-piece {
