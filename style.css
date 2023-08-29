@@ -45,6 +45,7 @@ body {
     .sidebar .disabled-black {
         grid-area: disabled-black;
         color: black;
+        align-items: flex-end;
     }
 
     .sidebar .disabled-white, .sidebar .disabled-black {
