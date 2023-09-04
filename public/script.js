@@ -12,6 +12,13 @@ const icons = {
 
 }
 let piecesState = [];
+let boardSpecialState = {
+    check: {
+        team: null,
+        attackId: null,
+        targetId: null
+    }
+}
 let selectedPieceIndex;
 let currentLegalMoves;
 let currentTeam = "white";
@@ -319,7 +326,7 @@ function selectPiece(index) {
 function calculateLegalMoves() {
     pieceType = piecesState[selectedPieceIndex].type;
     let moves;
-    currentLegalMoves = [];
+    let legalMoves = [];
 
     if (pieceType == "pawn") {
         moves = calculateLegalMovesPawn(piecesState[selectedPieceIndex]);
@@ -335,14 +342,28 @@ function calculateLegalMoves() {
         moves = calculateLegalMovesKing(piecesState[selectedPieceIndex]);
     }
 
+    if (boardSpecialState.check.team = currentTeam) {
+        
+    }
+
     // Remove fields outside board
     for (let i=0; i<moves.length; i++) {
         if ((moves[i].x <= 8) && (moves[i].x >= 0) && (moves[i].y <= 8) && (moves[i].y >= 0)) {
-            currentLegalMoves.push(moves[i]);
+            legalMoves.push(moves[i]);
         }
     }
 
+    // Check if piece is in check
+
+        // If not possible to move, gameOver()
+
+    currentLegalMoves = legalMoves;
+
     console.log(currentLegalMoves);
+}
+
+function targetIsKing(currentPiece) {
+
 }
 
 function calculateLegalMovesPawn(currentPawn) {

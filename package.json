@@ -1,0 +1,23 @@
+{
+  "name": "sjakkspill",
+  "version": "1.0.0",
+  "description": "[Link til Github Pages](https://tobiasrefsholt.github.io/Sjakkspill/)",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tobiasrefsholt/Sjakkspill.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/tobiasrefsholt/Sjakkspill/issues"
+  },
+  "homepage": "https://github.com/tobiasrefsholt/Sjakkspill#readme",
+  "dependencies": {
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2"
+  }
+}
