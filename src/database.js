@@ -53,7 +53,7 @@ async function getGameIdByPin(pin) {
 
     const results = await con.promise().query(sql);
 
-    if (!results[0].length) return;
+    if (results[0].length === 0) return false;
 
     return results[0][0].game_id;
 
@@ -74,4 +74,30 @@ async function removeJoinPin(gameId) {
     
 }
 
-module.exports = { newGameEntry, newPlayerEntry, getGameIdByPin, removeJoinPin }
+async function getLatestStateTimestamp(gameId) {
+
+    const sql = `SELECT latest_update FROM gamestate WHERE game_id = '${gameId}'`;
+    console.log(sql);
+
+    const results = await con.promise().query(sql);
+
+    if (results[0][0].length === 0) return false;
+
+    return results[0][0].latest_update;
+
+}
+
+async function getCurrentState(gameId) {
+
+    const sql = `SELECT pieces_state, turn FROM gamestate WHERE game_id = '${gameId}'`;
+    console.log(sql);
+
+    const results = await con.promise().query(sql);
+
+    if (results[0][0].length === 0) return false;
+
+    return results[0][0];
+
+}
+
+module.exports = { newGameEntry, newPlayerEntry, getGameIdByPin, removeJoinPin, getLatestStateTimestamp, getCurrentState }
