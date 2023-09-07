@@ -5,7 +5,7 @@ Ideer til å forbedre spillet
  - [x] Sette opp databasekobling i node
  - [ ] Sette opp api endpoints
    - [x] /createnewgame - Generer IDer og legger inn en database entry, returnerer gameID, joinPIN og playerID til klienten.
-   - [ ] /joinGame - Spiller to kan oppgi en sekssifret kode for å få tilgang til spillet. playerID blir generert/retunert og gameID blir retunert
+   - [x] /joinGame - Spiller to kan oppgi en sekssifret kode for å få tilgang til spillet. playerID blir generert/retunert og gameID blir retunert
    - [ ] /syncState - Client kaller denne med noen sekunders mellomrom. Sjekker om det er en endring på brettet siden sist. Hvis det er en ending, retuneres piecesState variablen.
    - [ ] /calculateLegalMoves - Returnerer lovilige trekk for en spesifikk brikke.
    - [ ] /movePiece - Flytter en brikke til et lovlig felt. Returnerer også piecesState variablen.
