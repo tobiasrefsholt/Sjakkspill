@@ -100,4 +100,23 @@ async function getCurrentState(gameId) {
 
 }
 
-module.exports = { newGameEntry, newPlayerEntry, getGameIdByPin, removeJoinPin, getLatestStateTimestamp, getCurrentState }
+async function updateState(gameId, state) {
+
+    const sql = `UPDATE gamestate
+        SET
+            pieces_state = '${state.piecesState}',
+            turn = '${state.turn}',
+            latest_update = '${state.timestamp}'
+        WHERE
+            game_id = '${gameId}'
+    `;
+    console.log(sql);
+
+    con.query(sql, async function (err, result) {
+        if (err) throw err;
+        
+        console.log(result);
+    });
+}
+
+module.exports = { newGameEntry, newPlayerEntry, getGameIdByPin, removeJoinPin, getLatestStateTimestamp, getCurrentState, updateState }
