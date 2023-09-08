@@ -1,7 +1,5 @@
 // Model
 
-const app = document.getElementById('app');
-const chessBoard = document.getElementById('chess-board');
 const icons = {
     pawn: "♟",
     bishop: "♝",
@@ -9,8 +7,9 @@ const icons = {
     rook: "♜",
     queen: "♛",
     king: "♚"
-
+    
 }
+let gameIsReady = false;
 let piecesState = [];
 let boardSpecialState = {
     check: {
@@ -21,25 +20,36 @@ let boardSpecialState = {
 }
 let selectedPieceIndex;
 let currentLegalMoves;
-let currentTeam = "white";
+let currentTeam;
+let serverPullInterval;// = setInterval(getstate(), 1000);
+let joinError = null;
 
 // View
 
-init();
+const app = document.getElementById('app');
+const chessBoard = document.getElementById('chess-board');
+let currentView = "main-menu";
 
-function init() {
-    // Generer modellen (plasser brikkene i piecesState)
-    resetPieces();
-    // Vis modellen
-    updateView();
-}
-
+updateView();
 
 function updateView() {
-    app.innerHTML = /*html*/ `
+    if (currentView == "activeGame") {
+        app.innerHTML = activeGameHTML();
+        updatePiecesView();
+        addEventListenersOnPieces();
+    } else if (currentView == "waitingForPlayer") {
+
+    } else {
+        // Show main menu
+        app.innerHTML = mainMenuHTML();
+    }
+}
+
+function activeGameHTML() {
+    return /*html*/`
         <div class="chess-board-wrapper">
             <h1 class="show-turn">${currentTeam}'s turn</h1>
-            ${boardView()}
+            ${boardViewHTML()}
             <div class="x-axis"><span>A</span><span>B</span><span>C</span><span>D</span><span>E</span><span>F</span><span>G</span><span>H</span></div>
             <div class="y-axis"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span></div>
             <div class="sidebar">
@@ -47,9 +57,35 @@ function updateView() {
                 ${disabledPiecesHTML("black")}
             </div>
         </div>
-    `
-    updatePiecesView();
-    addEventListenersOnPieces();
+    `;
+}
+
+function mainMenuHTML() {
+    return /*html*/`
+        <div class="main-menu">
+            <h1 class="title">Welcome to this crazy chess game!</h1>
+            <div class="menu-card">
+                <h2>New Online Game</h2>
+                <p>When you create a new game, you will receive a code. Share this code with your opponent so they can join!</p>
+                <button onclick="newgame()">Create new game</button>
+            </div>
+            <div class="menu-card">
+                <h2>Join with code</h2>
+                <p><input type="number" id="join-code" placeholder="000000" /></p>
+                <button onclick="joinGame()">Join</button>
+                <p>${joinError || ''}</p>
+            </div>
+            <div class="menu-card">
+                <h2>Play offline</h2>
+                <p>If you want to play against yourself, you can start an offline game here!</p>
+                <button onclick="playOffline()">Join</button>
+            </div>
+            <div class="menu-card">
+                <h2>Your active games</h2>
+                <p>Jump back into one of your games:</p>
+            </div>
+        </div>
+    `;
 }
 
 function disabledPiecesHTML(color) {
@@ -78,7 +114,7 @@ function disabledPiecesHTML(color) {
     return html;
 }
 
-function boardView() {
+function boardViewHTML() {
     let boardHtml = '';
 
     boardHtml += /*html*/`<div id="chess-board">`;
@@ -139,174 +175,36 @@ function updatePiecesView() {
 
 
 // Controller
-function resetPieces() {
-    piecesState = [];
 
-    resetPawns("white");
-    resetPawns("black");
-
-    // Bishops
-    piecesState.push({
-        position: {
-            x: 3,
-            y: 1
-        },
-        type: "bishop",
-        color: "white"
-    })
-    piecesState.push({
-        position: {
-            x: 6,
-            y: 1
-        },
-        type: "bishop",
-        color: "white"
-    })
-    piecesState.push({
-        position: {
-            x: 3,
-            y: 8
-        },
-        type: "bishop",
-        color: "black"
-    })
-    piecesState.push({
-        position: {
-            x: 6,
-            y: 8
-        },
-        type: "bishop",
-        color: "black"
-    })
-
-    // Knights
-    piecesState.push({
-        position: {
-            x: 2,
-            y: 1
-        },
-        type: "knight",
-        color: "white"
-    })
-    piecesState.push({
-        position: {
-            x: 7,
-            y: 1
-        },
-        type: "knight",
-        color: "white"
-    })
-    piecesState.push({
-        position: {
-            x: 2,
-            y: 8
-        },
-        type: "knight",
-        color: "black"
-    })
-    piecesState.push({
-        position: {
-            x: 7,
-            y: 8
-        },
-        type: "knight",
-        color: "black"
-    })
-
-    // Rooks
-    piecesState.push({
-        position: {
-            x: 1,
-            y: 1
-        },
-        type: "rook",
-        color: "white"
-    })
-    piecesState.push({
-        position: {
-            x: 8,
-            y: 1
-        },
-        type: "rook",
-        color: "white"
-    })
-    piecesState.push({
-        position: {
-            x: 1,
-            y: 8
-        },
-        type: "rook",
-        color: "black"
-    })
-    piecesState.push({
-        position: {
-            x: 8,
-            y: 8
-        },
-        type: "rook",
-        color: "black"
-    })
-
-    // Queens
-    piecesState.push({
-        position: {
-            x: 4,
-            y: 1
-        },
-        type: "queen",
-        color: "white"
-    })
-    piecesState.push({
-        position: {
-            x: 4,
-            y: 8
-        },
-        type: "queen",
-        color: "black"
-    })
-
-    // Kings
-    piecesState.push({
-        position: {
-            x: 5,
-            y: 1
-        },
-        type: "king",
-        color: "white"
-    })
-    piecesState.push({
-        position: {
-            x: 5,
-            y: 8
-        },
-        type: "king",
-        color: "black"
-    })
+function createNewGame() {
 
 }
 
-function resetPawns(color) {
-    let targetRow;
-    
-    if (color == "white") {
-        targetRow = 2;
-    } else if (color == "black") {
-        targetRow = 7;
-    } else {
-        return;
-    }
+function joinGame() {
 
-    for (let colCount = 1; colCount <= 8; colCount++) {
-        piecesState.push({
-            position: {
-                x: colCount,
-                y: targetRow
-            },
-            type: "pawn",
-            color: color,
-            firstMove: true,
-        })
-    }
+}
+
+function getState() {
+
+}
+
+function updateState() {
+
+}
+
+function getLegalMoves() {
+    
+}
+
+function updateModel() {
+    /* 
+        request = {
+            gameId,
+            playerId,
+            lastChange // Timestamp på siste sync
+            checkGameReady: true | false
+        }
+    */
 }
 
 function selectPiece(index) {
@@ -319,387 +217,8 @@ function selectPiece(index) {
     }
 
     selectedPieceIndex = index;
-    calculateLegalMoves();
+    getLegalMoves();
     updateView();
-}
-
-function calculateLegalMoves() {
-    pieceType = piecesState[selectedPieceIndex].type;
-    let moves;
-    let legalMoves = [];
-
-    if (pieceType == "pawn") {
-        moves = calculateLegalMovesPawn(piecesState[selectedPieceIndex]);
-    } else if (pieceType == "bishop") {
-        moves = calculateLegalMovesBishop(piecesState[selectedPieceIndex]);
-    } else if (pieceType == "knight") {
-        moves = calculateLegalMovesKnight(piecesState[selectedPieceIndex]);
-    } else if (pieceType == "rook") {
-        moves = calculateLegalMovesRook(piecesState[selectedPieceIndex]);
-    } else if (pieceType == "queen") {
-        moves = calculateLegalMovesQueen(piecesState[selectedPieceIndex]);
-    } else if (pieceType == "king") {
-        moves = calculateLegalMovesKing(piecesState[selectedPieceIndex]);
-    }
-
-    if (boardSpecialState.check.team = currentTeam) {
-        
-    }
-
-    // Remove fields outside board
-    for (let i=0; i<moves.length; i++) {
-        if ((moves[i].x <= 8) && (moves[i].x >= 0) && (moves[i].y <= 8) && (moves[i].y >= 0)) {
-            legalMoves.push(moves[i]);
-        }
-    }
-
-    // Check if piece is in check
-
-        // If not possible to move, gameOver()
-
-    currentLegalMoves = legalMoves;
-
-    console.log(currentLegalMoves);
-}
-
-function targetIsKing(currentPiece) {
-
-}
-
-function calculateLegalMovesPawn(currentPawn) {
-
-    let legalMoves = [];
-    // Definer hvilke regler som gjelder
-    let currentRange = currentPawn.firstMove ? [1,2] : [1];
-
-    // Definer offsetModifier som 1 eller -1, avhengig av fargen på brikken. Brukes for å snu om på lovlige trekk for svarte brikker.
-    let offsetModifier;
-    if (piecesState[selectedPieceIndex].color == "white") {
-        offsetModifier = 1;
-    } else {
-        offsetModifier = -1;
-    }
-
-    // Sjekk om bonden har noen å angripe (diagonalt)
-    let attackRange = [
-        {x: currentPawn.position.x + 1 * offsetModifier, y: currentPawn.position.y + 1 * offsetModifier },
-        {x: currentPawn.position.x + -1 * offsetModifier, y: currentPawn.position.y + 1 * offsetModifier }
-    ]
-    if ( currentPieceCanAttack(attackRange[0]) ) {
-        legalMoves.push(attackRange[0])
-    }
-    if ( currentPieceCanAttack(attackRange[1]) ) {
-        legalMoves.push(attackRange[1])
-    }
-
-    // Kalkuler lovlige felter etter reglene
-    for (let i=0; i<currentRange.length; i++) {
-        let targetCell = {
-            x: currentPawn.position.x,
-            y: currentPawn.position.y + currentRange[i] * offsetModifier
-        };
-        if (!getPieceIndexByPosition(targetCell)) {
-            legalMoves.push(targetCell);
-        }
-    }
-
-    return legalMoves;
-    
-}
-
-function calculateLegalMovesBishop(currentBishop) {
-
-    let legalMoves = calculateFieldsDiagonals(currentBishop);
-
-    return legalMoves;
-
-}
-
-function calculateLegalMovesKnight(currentKnight) {
-
-    let legalMoves = [];
-    let possibleMoves = [
-        { x: currentKnight.position.x + 2, y: currentKnight.position.y + 1 },
-        { x: currentKnight.position.x + 1, y: currentKnight.position.y + 2 },
-        { x: currentKnight.position.x - 1, y: currentKnight.position.y + 2 },
-        { x: currentKnight.position.x - 2, y: currentKnight.position.y + 1 },
-        { x: currentKnight.position.x - 2, y: currentKnight.position.y - 1 },
-        { x: currentKnight.position.x - 1, y: currentKnight.position.y - 2 },
-        { x: currentKnight.position.x + 1, y: currentKnight.position.y - 2 },
-        { x: currentKnight.position.x + 2, y: currentKnight.position.y - 1 },
-    ];
-
-    for (let i=0; i<possibleMoves.length; i++) {
-
-        if (fieldIsOccupied(possibleMoves[i]) != currentKnight.color) {
-            legalMoves.push(possibleMoves[i]);
-        }
-
-    }
-
-    return legalMoves;
-}
-
-function calculateLegalMovesRook(currentRook) {
-
-    let northSouth = calculateFieldsNorthSouth(currentRook);
-    let eastWest = calculateFieldsEastWest(currentRook);
-    let legalMoves = northSouth.concat(eastWest);
-
-    return legalMoves;
-
-}
-
-function calculateLegalMovesQueen(currentQueen) {
-
-    let northSouth = calculateFieldsNorthSouth(currentQueen);
-    let eastWest = calculateFieldsEastWest(currentQueen);
-    let diagonals = calculateFieldsDiagonals(currentQueen);
-    let legalMoves = northSouth.concat(eastWest, diagonals);
-
-    return legalMoves;
-}
-
-function calculateLegalMovesKing(currentKing) {
-
-    let legalMoves = [];
-    let possibleMoves = [
-        { x: currentKing.position.x, y: currentKing.position.y + 1 },
-        { x: currentKing.position.x + 1, y: currentKing.position.y + 1 },
-        { x: currentKing.position.x + 1, y: currentKing.position.y},
-        { x: currentKing.position.x + 1, y: currentKing.position.y - 1 },
-        { x: currentKing.position.x, y: currentKing.position.y - 1},
-        { x: currentKing.position.x - 1, y: currentKing.position.y - 1 },
-        { x: currentKing.position.x - 1, y: currentKing.position.y },
-        { x: currentKing.position.x - 1, y: currentKing.position.y + 1 },
-    ];
-
-    for (let i=0; i<possibleMoves.length; i++) {
-
-        if (fieldIsOccupied(possibleMoves[i]) != currentKing.color) {
-            legalMoves.push(possibleMoves[i]);
-        }
-
-    }
-
-    return legalMoves;
-    
-}
-
-function calculateFieldsDiagonals(piece) {
-
-    let legalMoves = [];
-
-    // North-east
-    for (let i=1; i<=7; i++) {    
-        let targetCell = {};
-        targetCell.x = piece.position.x + i;
-        targetCell.y = piece.position.y + i;
-        if (fieldIsOccupied(targetCell) == piece.color) {
-            break;
-        }
-        legalMoves.push(targetCell);
-        if (fieldIsOccupied(targetCell)) {
-            break;
-        }
-    }
-
-    // South-east
-    for (let i=1; i<=7; i++) {
-        let targetCell = {};
-        targetCell.x = piece.position.x + i;
-        targetCell.y = piece.position.y - i;
-        if (fieldIsOccupied(targetCell) == piece.color) {
-            break;
-        }
-        legalMoves.push(targetCell);
-        if (fieldIsOccupied(targetCell)) {
-            break;
-        }
-    }
-
-    // South-west
-    for (let i=1; i<=7; i++) {
-        let targetCell = {};
-        targetCell.x = piece.position.x - i;
-        targetCell.y = piece.position.y - i;
-        if (fieldIsOccupied(targetCell) == piece.color) {
-            break;
-        }
-        legalMoves.push(targetCell);
-        if (fieldIsOccupied(targetCell)) {
-            break;
-        }
-    }
-
-    // North-west
-    for (let i=1; i<=7; i++) {
-        let targetCell = {};
-        targetCell.x = piece.position.x - i;
-        targetCell.y = piece.position.y + i;
-        if (fieldIsOccupied(targetCell) == piece.color) {
-            break;
-        }
-        legalMoves.push(targetCell);
-        if (fieldIsOccupied(targetCell)) {
-            break;
-        }
-    }
-
-    return legalMoves;
-
-}
-
-function calculateFieldsNorthSouth(piece) {
-
-    let legalMoves = [];
-
-    // North
-    for (let i=1; i<=7; i++) {
-        let targetCell = {};
-        targetCell.x = piece.position.x;
-        targetCell.y = piece.position.y + i;
-        if (fieldIsOccupied(targetCell) == piece.color) {
-            break;
-        }
-        legalMoves.push(targetCell);
-        if (fieldIsOccupied(targetCell)) {
-            break;
-        }
-    }
-
-    // South
-    for (let i=1; i<=7; i++) {
-        let targetCell = {};
-        targetCell.x = piece.position.x;
-        targetCell.y = piece.position.y - i;
-        if (fieldIsOccupied(targetCell) == piece.color) {
-            break;
-        }
-        legalMoves.push(targetCell);
-        if (fieldIsOccupied(targetCell)) {
-            break;
-        }
-    }
-
-    return legalMoves;
-
-}
-
-function calculateFieldsEastWest(piece) {
-
-    let legalMoves = [];
-
-    // East
-    for (let i=1; i<=7; i++) {
-        let targetCell = {};
-        targetCell.x = piece.position.x + i;
-        targetCell.y = piece.position.y;
-        if (fieldIsOccupied(targetCell) == piece.color) {
-            break;
-        }
-        legalMoves.push(targetCell);
-        if (fieldIsOccupied(targetCell)) {
-            break;
-        }
-    }
-
-    // West
-    for (let i=1; i<=7; i++) {
-        let targetCell = {};
-        targetCell.x = piece.position.x - i;
-        targetCell.y = piece.position.y;
-        if (fieldIsOccupied(targetCell) == piece.color) {
-            break;
-        }
-        legalMoves.push(targetCell);
-        if (fieldIsOccupied(targetCell)) {
-            break;
-        }
-    }
-
-    return legalMoves;
-
-}
-
-// Returns false if field is occupied, and piece color if occupied
-
-function fieldIsOccupied(targetCell) {
-
-    let targetPiece = getPieceIndexByPosition(targetCell)
-    
-    if (!targetPiece && targetPiece !== 0) {
-        return false;
-    }
-
-    return piecesState[targetPiece].color;
-
-}
-
-function currentPieceCanAttack(target) {
-
-    if (!piecesState[getPieceIndexByPosition(target)]) {
-        return false;
-    }
-
-    let currentPiece = piecesState[selectedPieceIndex];
-    let targetPiece = piecesState[getPieceIndexByPosition(target)];
-
-    if (targetPiece.color == currentPiece.color) {
-        return false;
-    }
-
-    return true;
-}
-
-function getPieceIndexByPosition(position) {
-
-    for (let i = 0; i < piecesState.length; i++) {
-        
-        if (!piecesState[i].disabled && JSON.stringify(piecesState[i].position) == JSON.stringify(position)) {
-            return i;
-        }
-
-    }
-
-    return false;
-
-}
-
-function getDisabledPiecesIndex(color) {
-    let disabledPieces = [];
-
-    for (let i = 0; i < piecesState.length; i++) {
-        
-        if (piecesState[i].disabled && piecesState[i].color == color) {
-            disabledPieces.push(i);
-        }
-
-    }
-
-    return disabledPieces;
-}
-
-function moveToCell(targetPosition) {
-    console.log(`Moving ${piecesState[selectedPieceIndex].color} ${piecesState[selectedPieceIndex].type} at x:${piecesState[selectedPieceIndex].position.x}, y:${piecesState[selectedPieceIndex].position.y} to x: ${targetPosition.x}, y: ${targetPosition.y}`);
-
-    let targetPositionIndex;
-
-    if (targetPositionIndex = getPieceIndexByPosition(targetPosition)) {
-        piecesState[targetPositionIndex].disabled = true;
-    }
-    console.log("Piece to remove: " + targetPositionIndex);
-
-    piecesState[selectedPieceIndex].position.x = targetPosition.x;
-    piecesState[selectedPieceIndex].position.y = targetPosition.y;
-
-    piecesState[selectedPieceIndex].firstMove = false;
-
-    selectedPieceIndex = false;
-    currentLegalMoves = false;
-    (currentTeam == "white") ? currentTeam = "black" : currentTeam = "white";
-    updateView();
-
 }
 
 function addEventListenersOnPieces() {
