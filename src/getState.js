@@ -7,11 +7,17 @@ async function getState(request) {
             gameId,
             playerId,
             lastChange // Timestamp på siste sync
+            checkGameReady: true | false
         }
     */
 
     if (!request.gameId) return { error: "Ingen gameId definert, eller ugyldig format" };
     if (!request.playerId) return { error: "Ingen playerId definert, eller ugyldig format" };
+
+    if (request.checkGameReady) {
+        let gameReady = await database.checkGameReady(request.gameId);
+        return { gameReady };
+    }
 
     // Set default til true, sånn at man forcer en update om man ikke sender med lastChange fra klienten.
     let stateHasChanged = true;

@@ -119,4 +119,16 @@ async function updateState(gameId, state) {
     });
 }
 
-module.exports = { newGameEntry, newPlayerEntry, getGameIdByPin, removeJoinPin, getLatestStateTimestamp, getCurrentState, updateState }
+async function checkGameReady(gameId) {
+
+    const sql = `SELECT black_player_id FROM gamestate WHERE game_id = '${gameId}'`;
+    console.log(sql);
+
+    const results = await con.promise().query(sql);
+    console.log(results);
+
+    return (results[0][0]) ? true : false;
+
+}
+
+module.exports = { newGameEntry, newPlayerEntry, getGameIdByPin, removeJoinPin, getLatestStateTimestamp, getCurrentState, updateState, checkGameReady }

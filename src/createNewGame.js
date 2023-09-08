@@ -6,19 +6,23 @@ function createNewGame() {
     const gameId = numberGen.generateId();
     const joinPin = numberGen.generatePin();
     const firstPlayerId = numberGen.generateId();
+    const timestamp = new Date().getTime();
     
     database.newGameEntry(gameId, joinPin, firstPlayerId);
     database.newPlayerEntry(firstPlayerId, gameId);
     database.updateState(gameId, {
         piecesState: JSON.stringify(getInitialPiecesState()),
         turn: "white",
-        timestamp: new Date().getTime()
+        timestamp
     })
 
     return {
         gameId,
         joinPin,
         playerId: firstPlayerId,
+        turn: "white",
+        lastChange: timestamp,
+        piecesState: getInitialPiecesState(),
     };
 }
 
