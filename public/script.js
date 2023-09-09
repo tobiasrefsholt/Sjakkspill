@@ -7,22 +7,25 @@ const icons = {
     rook: "♜",
     queen: "♛",
     king: "♚"
-    
 }
-let gameIsReady = false;
-let piecesState = [];
-let boardSpecialState = {
-    check: {
-        team: null,
-        attackId: null,
-        targetId: null
-    }
-}
+
 let selectedPieceIndex;
 let currentLegalMoves;
-let currentTeam;
-let serverPullInterval;// = setInterval(getstate(), 1000);
+let playerColor;
+
 let joinError = null;
+
+// True when opponent has joined
+let gameReady = false;
+
+// Syncs from api
+let gameId;
+let joinPin = null;
+let lastChange = 0;
+let piecesState = [];
+let playerId;
+let turn;
+
 
 // View
 
@@ -38,23 +41,33 @@ function updateView() {
         updatePiecesView();
         addEventListenersOnPieces();
     } else if (currentView == "waitingForPlayer") {
-
+        app.innerHTML = waitingForPlayerHTML();
     } else {
         // Show main menu
         app.innerHTML = mainMenuHTML();
     }
 }
 
+function waitingForPlayerHTML() {
+    return /*html*/`
+        <div class="waiting-for-player">
+            <h1>Waiting for player to join</h1>
+            <p>Share this code with your opponent, so they can join the game.</p>
+            <span>${joinPin}</span>
+        </div>
+    `;
+}
+
 function activeGameHTML() {
     return /*html*/`
         <div class="chess-board-wrapper">
-            <h1 class="show-turn">${currentTeam}'s turn</h1>
+            <h1 class="show-turn">${turn}'s turn</h1>
             ${boardViewHTML()}
             <div class="x-axis"><span>A</span><span>B</span><span>C</span><span>D</span><span>E</span><span>F</span><span>G</span><span>H</span></div>
             <div class="y-axis"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span></div>
             <div class="sidebar">
-                ${disabledPiecesHTML("white")}
-                ${disabledPiecesHTML("black")}
+                disabledPiecesHTML("white")
+                disabledPiecesHTML("black")
             </div>
         </div>
     `;
@@ -67,18 +80,25 @@ function mainMenuHTML() {
             <div class="menu-card">
                 <h2>New Online Game</h2>
                 <p>When you create a new game, you will receive a code. Share this code with your opponent so they can join!</p>
-                <button onclick="newgame()">Create new game</button>
+                <button onclick="createNewGame()">Create new game</button>
             </div>
             <div class="menu-card">
                 <h2>Join with code</h2>
-                <p><input type="number" id="join-code" placeholder="000000" /></p>
-                <button onclick="joinGame()">Join</button>
+                <p>
+                    <input
+                        type="number"
+                        id="join-code"
+                        placeholder="000000"
+                        oninput="joinPin = this.value"
+                    />
+                </p>
                 <p>${joinError || ''}</p>
+                <button onclick="joinGame()">Join</button>
             </div>
             <div class="menu-card">
                 <h2>Play offline</h2>
                 <p>If you want to play against yourself, you can start an offline game here!</p>
-                <button onclick="playOffline()">Join</button>
+                <button onclick="playOffline()">New offline game</button>
             </div>
             <div class="menu-card">
                 <h2>Your active games</h2>
@@ -176,15 +196,113 @@ function updatePiecesView() {
 
 // Controller
 
-function createNewGame() {
+let serverPullInterval = setInterval( () => {
+    
+    if (!gameId) return;
+
+    if (!gameReady) {
+        console.log("Pulling server: Game is not ready!");
+        getState(true);
+        return;
+    } 
+    
+    if (gameReady && turn == playerColor && currentView == "activeGame") {
+        console.log("Waiting for player to move");
+        return;
+    }
+
+    if (gameReady) {
+        console.log("Pulling server: Game is ready, syncing.");
+        currentView = "activeGame";
+        getState(false);
+        updateView();
+    }
+    
+}, 1000);
+
+async function createNewGame() {
+    const response = await fetch("/createNewGame", {
+    method: 'POST',
+    headers: {
+    'Accept': 'application/json',
+    'Content-Type': 'application/json'
+    }
+    });
+
+    response.json().then(data => {
+        console.log(data);
+        // Update local variables
+        gameId = data.gameId;
+        joinPin = data.joinPin;
+        lastChange = data.lastChange;
+        piecesState = data.piecesState;
+        playerId = data.playerId;
+        turn = data.turn;
+        playerColor = "white"   // Set playerColor = white for game starter. This will probably change at some time.
+
+        // Change current view to "Waiting for player"
+        currentView = "waitingForPlayer";
+        updateView();
+    });
+}
+
+async function joinGame() {
+
+    const response = await fetch("/joinGame", {
+        method: 'POST',
+        headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+        },
+        body: `{
+            "joinPin": ${joinPin}
+        }`
+    });
+
+    response.json().then(async data => {
+        console.log(data);
+        if (data.error) {
+            joinError = data.error;
+            updateView();
+            return;
+        }
+        playerId = data.playerId;
+        gameId = data.gameId;
+        playerColor = "black" // Set playerColor = black for 2nd player.
+        getState(false);
+    });
 
 }
 
-function joinGame() {
+async function getState(checkGameReady) {
 
-}
+    const response = await fetch("/getstate", {
+        method: 'POST',
+        headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+        },
+        body: `{
+            "gameId": "${gameId}",
+            "playerId": "${playerId}",
+            "lastChange": ${lastChange},
+            "checkGameReady": ${checkGameReady}
+        }`
+    });
 
-function getState() {
+    response.json().then(data => {
+        console.log(data);
+        if (checkGameReady) {
+            gameReady = data.gameReady;
+            return;
+        }
+        if (!data.hasChanged) return;
+        turn = data.turn;
+        lastChange = data.lastChange;
+        piecesState = data.piecesState;
+        currentView = "activeGame";
+        updateView();
+    });
 
 }
 
@@ -209,7 +327,7 @@ function updateModel() {
 
 function selectPiece(index) {
     // If empty cell or enemy piece, reset variables and update view
-    if ( !index && index !== 0 || piecesState[index].color !== currentTeam ) {
+    if ( !index && index !== 0 || piecesState[index].color !== turn ) {
         selectedPieceIndex = '';
         currentLegalMoves = [];
         updateView();
@@ -221,7 +339,23 @@ function selectPiece(index) {
     updateView();
 }
 
+function getDisabledPiecesIndex(color) {
+    let disabledPieces = [];
+
+    for (let i = 0; i < piecesState.length; i++) {
+        
+        if (piecesState[i].disabled && piecesState[i].color == color) {
+            disabledPieces.push(i);
+        }
+
+    }
+
+    return disabledPieces;
+}
+
 function addEventListenersOnPieces() {
+    if (turn !== playerColor) return;
+
     document.querySelectorAll('.cell:not(.cell-legal-move)').forEach(cell => {
 
         cell.addEventListener("mousedown", function (event) {

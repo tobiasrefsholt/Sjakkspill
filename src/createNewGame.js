@@ -27,13 +27,8 @@ function createNewGame() {
 }
 
 function getInitialPiecesState() {
-    
-    const piecesState = [];
 
-    piecesState.concat(
-        getInitialPawnPositions("white"),
-        getInitialPawnPositions("black")
-    );
+    let piecesState = getInitialPawnPositions("white").concat(getInitialPawnPositions("black"));
 
     // Bishops
     piecesState.push({

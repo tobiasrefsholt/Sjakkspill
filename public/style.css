@@ -41,6 +41,7 @@ body {
     background-color: black;
     font-weight: bold;
     font-size: 1rem;
+    cursor: pointer;
 }
 
 .main-menu input {
@@ -52,6 +53,15 @@ body {
     font-weight: bold;
     font-size: 3rem;
     width: 100%;
+}
+
+.waiting-for-player {
+    text-align: center;
+}
+
+.waiting-for-player span {
+    font-size: 3rem;
+    font-weight: bold;
 }
 
 .chess-board-wrapper {

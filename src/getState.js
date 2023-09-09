@@ -36,7 +36,7 @@ async function getState(request) {
     let state = await database.getCurrentState(request.gameId); // Returnerer objekt {piecesState (JSON), turn}
 
     return {
-        hasChanged: stateHasChanged,
+        hasChanged: true,
         turn: state.turn,
         lastChange: latestServerTimestamp,
         piecesState: state.pieces_state

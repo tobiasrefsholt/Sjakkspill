@@ -17,8 +17,10 @@ async function joinNewGame(request) {
     await database.removeJoinPin(gameId);
 
     const playerId = numberGen.generateId();
-
     await database.newPlayerEntry(playerId, gameId);
+
+    // Addplayer to gametable
+    await database.addBlackPlayerToGamestate(playerId, gameId);
 
     return {
         playerId,

@@ -44,6 +44,21 @@ function newPlayerEntry(playerId, gameId) {
     return gameId;
 }
 
+function addBlackPlayerToGamestate(playerId, gameId) {
+
+    if (!playerId && !gameId) return;
+
+    const sql = `UPDATE gamestate SET black_player_id = '${playerId}' WHERE game_id = '${gameId}'`;
+
+    con.query(sql, function (err, result) {
+        if (err) throw err;
+        
+        gameId = result.id;
+        console.log(`New player (playerId = ${playerId}) added to 'gamestate' table`);
+    });
+
+}
+
 async function getGameIdByPin(pin) {
 
     if (!pin) return;
@@ -127,8 +142,12 @@ async function checkGameReady(gameId) {
     const results = await con.promise().query(sql);
     console.log(results);
 
-    return (results[0][0]) ? true : false;
+    if (results[0][0].hasOwnProperty("black_player_id")) {
+        return (results[0][0].black_player_id !== null) ? true : false;
+    }
+
+    return false;
 
 }
 
-module.exports = { newGameEntry, newPlayerEntry, getGameIdByPin, removeJoinPin, getLatestStateTimestamp, getCurrentState, updateState, checkGameReady }
+module.exports = { newGameEntry, newPlayerEntry, addBlackPlayerToGamestate, getGameIdByPin, removeJoinPin, getLatestStateTimestamp, getCurrentState, updateState, checkGameReady }

@@ -341,20 +341,6 @@ function getPieceIndexByPosition(position) {
 
 }
 
-function getDisabledPiecesIndex(color) {
-    let disabledPieces = [];
-
-    for (let i = 0; i < piecesState.length; i++) {
-        
-        if (piecesState[i].disabled && piecesState[i].color == color) {
-            disabledPieces.push(i);
-        }
-
-    }
-
-    return disabledPieces;
-}
-
 function moveToCell(targetPosition) {
     console.log(`Moving ${piecesState[selectedPieceIndex].color} ${piecesState[selectedPieceIndex].type} at x:${piecesState[selectedPieceIndex].position.x}, y:${piecesState[selectedPieceIndex].position.y} to x: ${targetPosition.x}, y: ${targetPosition.y}`);
 
