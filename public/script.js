@@ -310,7 +310,26 @@ function updateState() {
 
 }
 
-function getLegalMoves() {
+async function getLegalMoves(index) {
+
+    const response = await fetch("/getmoves", {
+        method: 'POST',
+        headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+        },
+        body: `{
+            "gameId": "${gameId}",
+            "selectedPieceIndex": ${index}
+        }`
+    });
+
+    response.json().then(async data => {
+        console.log(data);
+        if (data.error) { alert(data.error); return; }
+        currentLegalMoves = data;
+        updateView();
+    });
     
 }
 
@@ -328,15 +347,14 @@ function updateModel() {
 function selectPiece(index) {
     // If empty cell or enemy piece, reset variables and update view
     if ( !index && index !== 0 || piecesState[index].color !== turn ) {
-        selectedPieceIndex = '';
+        selectedPieceIndex = null;
         currentLegalMoves = [];
         updateView();
         return;
     }
 
     selectedPieceIndex = index;
-    getLegalMoves();
-    updateView();
+    getLegalMoves(index);
 }
 
 function getDisabledPiecesIndex(color) {
