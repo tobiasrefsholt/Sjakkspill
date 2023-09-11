@@ -6,7 +6,7 @@ let turn;
 async function currentLegalMoves(request) {
 
     if (!request.gameId) return {"error": "GameId not defined"};
-    if (!request.selectedPieceIndex) return {"error": "selectedPieceIndex not defined"};
+    if (!request.selectedPieceIndex && request.selectedPieceIndex !== 0) return {"error": "selectedPieceIndex not defined"};
     
     let selectedPieceIndex = parseInt(request.selectedPieceIndex);
     let state = await database.getCurrentState(request.gameId); /* Returns {piecesState, turn} if gameId exists, else false */
@@ -55,7 +55,7 @@ function calculateLegalMoves(selectedPieceIndex) {
 
     // Remove fields outside board
     for (let i=0; i<moves.length; i++) {
-        if ((moves[i].x <= 8) && (moves[i].x >= 0) && (moves[i].y <= 8) && (moves[i].y >= 0)) {
+        if ((moves[i].x <= 8) && (moves[i].x >= 1) && (moves[i].y <= 8) && (moves[i].y >= 1)) {
             legalMoves.push(moves[i]);
         }
     }
