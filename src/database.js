@@ -28,11 +28,11 @@ function newGameEntry(gameId, joinPin, firstPlayerId) {
 
 }
 
-function newPlayerEntry(playerId, gameId) {
+function newPlayerEntry(playerId, gameId, color) {
 
     if (!playerId && !gameId) return;
 
-    const sql = `INSERT INTO players (player_id, game_id) VALUES('${playerId}', '${gameId}')`;
+    const sql = `INSERT INTO players (player_id, game_id, color) VALUES('${playerId}', '${gameId}', '${color}')`;
 
     con.query(sql, function (err, result) {
         if (err) throw err;
@@ -56,6 +56,21 @@ function addBlackPlayerToGamestate(playerId, gameId) {
         gameId = result.id;
         console.log(`New player (playerId = ${playerId}) added to 'gamestate' table`);
     });
+
+}
+
+async function getPlayerColor(playerId, gameId) {
+
+    if (!playerId && !gameId) return;
+
+    const sql = `SELECT color FROM players WHERE player_id = '${playerId}' AND game_id = '${gameId}'`;
+    console.log(sql);
+
+    const results = await con.promise().query(sql);
+
+    if (results[0].length === 0) return false;
+
+    return results[0][0].color;
 
 }
 
@@ -150,4 +165,4 @@ async function checkGameReady(gameId) {
 
 }
 
-module.exports = { newGameEntry, newPlayerEntry, addBlackPlayerToGamestate, getGameIdByPin, removeJoinPin, getLatestStateTimestamp, getCurrentState, updateState, checkGameReady }
+module.exports = { newGameEntry, newPlayerEntry, addBlackPlayerToGamestate, getPlayerColor, getGameIdByPin, removeJoinPin, getLatestStateTimestamp, getCurrentState, updateState, checkGameReady }

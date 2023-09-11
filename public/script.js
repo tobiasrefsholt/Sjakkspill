@@ -36,19 +36,28 @@ let currentView = "main-menu";
 updateView();
 
 function updateView() {
+
     if (currentView == "activeGame") {
+
         app.innerHTML = activeGameHTML();
         updatePiecesView();
         addEventListenersOnPieces();
+
     } else if (currentView == "waitingForPlayer") {
+
         app.innerHTML = waitingForPlayerHTML();
+
     } else {
+
         // Show main menu
         app.innerHTML = mainMenuHTML();
+        
     }
+
 }
 
 function waitingForPlayerHTML() {
+
     return /*html*/`
         <div class="waiting-for-player">
             <h1>Waiting for player to join</h1>
@@ -56,9 +65,11 @@ function waitingForPlayerHTML() {
             <span>${joinPin}</span>
         </div>
     `;
+
 }
 
 function activeGameHTML() {
+
     return /*html*/`
         <div class="chess-board-wrapper">
             <h1 class="show-turn">${turn}'s turn</h1>
@@ -71,9 +82,11 @@ function activeGameHTML() {
             </div>
         </div>
     `;
+
 }
 
 function mainMenuHTML() {
+
     return /*html*/`
         <div class="main-menu">
             <h1 class="title">Welcome to this crazy chess game!</h1>
@@ -106,6 +119,7 @@ function mainMenuHTML() {
             </div>
         </div>
     `;
+
 }
 
 function disabledPiecesHTML(color) {
@@ -132,9 +146,11 @@ function disabledPiecesHTML(color) {
     html += `</div>`;
 
     return html;
+
 }
 
 function boardViewHTML() {
+
     let boardHtml = '';
 
     boardHtml += /*html*/`<div id="chess-board">`;
@@ -147,9 +163,11 @@ function boardViewHTML() {
     boardHtml += /*html*/`</div>`;
 
     return boardHtml;
+
 }
 
 function boardRowView(rowParity, rowCount) {
+
     let html = '';
     let CellParityOffest = 0;
 
@@ -172,12 +190,15 @@ function boardRowView(rowParity, rowCount) {
     }
 
     return html;
+
 }
 
 function updatePiecesView() {
+
     let activePieceClass = '';
 
     for (let i=0; i<piecesState.length; i++) {
+
         if (!piecesState[i].disabled) {
             let piece = piecesState[i];
             let icon = icons[piece.type];
@@ -190,7 +211,9 @@ function updatePiecesView() {
                 targetCell.classList.add("selected-piece");
             }
         }
+
     }
+
 }
 
 
@@ -221,6 +244,7 @@ let serverPullInterval = setInterval( () => {
 }, 1000);
 
 async function createNewGame() {
+
     const response = await fetch("/createNewGame", {
     method: 'POST',
     headers: {
@@ -244,6 +268,7 @@ async function createNewGame() {
         currentView = "waitingForPlayer";
         updateView();
     });
+
 }
 
 async function joinGame() {
@@ -306,7 +331,31 @@ async function getState(checkGameReady) {
 
 }
 
-function updateState() {
+async function moveToCell(targetPosition) {
+
+    const data = {
+        gameId: gameId,
+        playerId: playerId,
+        selectedPieceIndex: selectedPieceIndex,
+        targetPosition: targetPosition
+    };
+
+    console.log(data);
+    console.log(JSON.stringify(data));
+
+    const response = await fetch("/movepiece", {
+        method: 'POST',
+        headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    });
+
+    response.json().then(data => {
+        console.log(data);
+        getState(false);
+    });
 
 }
 
@@ -333,18 +382,8 @@ async function getLegalMoves(index) {
     
 }
 
-function updateModel() {
-    /* 
-        request = {
-            gameId,
-            playerId,
-            lastChange // Timestamp på siste sync
-            checkGameReady: true | false
-        }
-    */
-}
-
 function selectPiece(index) {
+
     // If empty cell or enemy piece, reset variables and update view
     if ( !index && index !== 0 || piecesState[index].color !== turn ) {
         selectedPieceIndex = null;
@@ -355,9 +394,11 @@ function selectPiece(index) {
 
     selectedPieceIndex = index;
     getLegalMoves(index);
+
 }
 
 function getDisabledPiecesIndex(color) {
+
     let disabledPieces = [];
 
     for (let i = 0; i < piecesState.length; i++) {
@@ -369,9 +410,11 @@ function getDisabledPiecesIndex(color) {
     }
 
     return disabledPieces;
+
 }
 
 function addEventListenersOnPieces() {
+
     if (turn !== playerColor) return;
 
     document.querySelectorAll('.cell:not(.cell-legal-move)').forEach(cell => {
@@ -392,4 +435,5 @@ function addEventListenersOnPieces() {
         });
 
     });
+
 }

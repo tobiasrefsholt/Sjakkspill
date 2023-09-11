@@ -9,7 +9,7 @@ function createNewGame() {
     const timestamp = new Date().getTime();
     
     database.newGameEntry(gameId, joinPin, firstPlayerId);
-    database.newPlayerEntry(firstPlayerId, gameId);
+    database.newPlayerEntry(firstPlayerId, gameId, "white");
     database.updateState(gameId, {
         piecesState: JSON.stringify(getInitialPiecesState()),
         turn: "white",

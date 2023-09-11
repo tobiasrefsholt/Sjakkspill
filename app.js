@@ -41,11 +41,12 @@ app.post('/getmoves', async (request, response) => {
     response.send(apiResponse);
 });
 
-app.post('/updatestate'), async (request, response) => {
+app.post('/movepiece', async (request, response) => {
     const updateState = require("./src/updateState.js");
     const apiResponse = await updateState.movePiece(request.body);
     response.header('Content-Type: application/json');
-}
+    response.send(apiResponse);
+});
 
 app.listen(process.env.port, () => {
     console.log(`Example app listening on port ${process.env.port}`);

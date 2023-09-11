@@ -363,4 +363,4 @@ function getPieceIndexByPosition(position) {
 
 }
 
-module.exports = { currentLegalMoves };
+module.exports = { currentLegalMoves, getPieceIndexByPosition };
