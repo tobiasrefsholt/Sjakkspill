@@ -34,6 +34,13 @@ app.post('/getstate', async (request, response) => {
     response.send(apiResponse);
 });
 
+app.post('/getmoves', async (request, response) => {
+    const getMoves = require("./src/getMoves.js");
+    const apiResponse = await getMoves.currentLegalMoves(request.body);
+    response.header('Content-Type: application/json');
+    response.send(apiResponse);
+});
+
 app.post('/updatestate'), async (request, response) => {
     const updateState = require("./src/updateState.js");
     const apiResponse = await updateState.movePiece(request.body);
