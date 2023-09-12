@@ -275,15 +275,17 @@ async function createNewGame() {
 
 async function joinGame() {
 
+    const payload = {
+        joinPin
+    }
+
     const response = await fetch("/joinGame", {
         method: 'POST',
         headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json'
         },
-        body: `{
-            "joinPin": ${joinPin}
-        }`
+        body: JSON.stringify(payload)
     });
 
     response.json().then(async data => {
@@ -303,18 +305,20 @@ async function joinGame() {
 
 async function getState(checkGameReady) {
 
+    const payload = {
+        gameId,
+        playerId,
+        lastChange,
+        checkGameReady
+    }
+
     const response = await fetch("/getstate", {
         method: 'POST',
         headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json'
         },
-        body: `{
-            "gameId": "${gameId}",
-            "playerId": "${playerId}",
-            "lastChange": ${lastChange},
-            "checkGameReady": ${checkGameReady}
-        }`
+        body: JSON.stringify(payload)
     });
 
     response.json().then(data => {
@@ -335,7 +339,7 @@ async function getState(checkGameReady) {
 
 async function moveToCell(targetPosition) {
 
-    const sendData = {
+    const payload = {
         gameId: gameId,
         playerId: playerId,
         selectedPieceIndex: selectedPieceIndex,
@@ -348,7 +352,7 @@ async function moveToCell(targetPosition) {
         'Accept': 'application/json',
         'Content-Type': 'application/json'
         },
-        body: JSON.stringify(sendData)
+        body: JSON.stringify(payload)
     });
 
     response.json().then(data => {
@@ -362,16 +366,18 @@ async function moveToCell(targetPosition) {
 
 async function getLegalMoves(index) {
 
+    const payload = {
+        gameId,
+        selectedPieceIndex: index
+    }
+
     const response = await fetch("/getmoves", {
         method: 'POST',
         headers: {
         'Accept': 'application/json',
         'Content-Type': 'application/json'
         },
-        body: `{
-            "gameId": "${gameId}",
-            "selectedPieceIndex": ${index}
-        }`
+        body: JSON.stringify(payload)
     });
 
     response.json().then(async data => {
