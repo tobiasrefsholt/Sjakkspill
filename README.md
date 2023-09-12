@@ -1,2 +1,2 @@
 # Sjakkspill (Work in progress)
-[Link til Github Pages](https://tobiasrefsholt.github.io/Sjakkspill/)
+[Link til spillet](https://spaghettigames.no/)
