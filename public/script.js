@@ -342,9 +342,6 @@ async function moveToCell(targetPosition) {
         targetPosition: targetPosition
     };
 
-    console.log(sendData);
-    console.log(JSON.stringify(sendData));
-
     const response = await fetch("/movepiece", {
         method: 'POST',
         headers: {
@@ -356,10 +353,9 @@ async function moveToCell(targetPosition) {
 
     response.json().then(data => {
         console.log(data);
-        getState(false);
         selectedPieceIndex = null;
         currentLegalMoves = null;
-        updateView();
+        getState(false);
     });
 
 }
