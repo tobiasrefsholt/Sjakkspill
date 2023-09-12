@@ -96,7 +96,7 @@ function calculateLegalMovesPawn(currentPawn) {
             x: currentPawn.position.x,
             y: currentPawn.position.y + currentRange[i] * offsetModifier
         };
-        if (!getPieceIndexByPosition(targetCell)) {
+        if (!getPieceIndexByPosition(targetCell, piecesState)) {
             legalMoves.push(targetCell);
         }
     }
@@ -324,7 +324,7 @@ function calculateFieldsEastWest(piece) {
 
 function fieldIsOccupied(targetCell) {
 
-    let targetPiece = getPieceIndexByPosition(targetCell);
+    let targetPiece = getPieceIndexByPosition(targetCell, piecesState);
     
     if (!targetPiece && targetPiece !== 0) {
         return false;
@@ -336,11 +336,11 @@ function fieldIsOccupied(targetCell) {
 
 function currentPieceCanAttack(selectedPiece, target) {
 
-    if (!piecesState[getPieceIndexByPosition(target)]) {
+    if (!piecesState[getPieceIndexByPosition(target, piecesState)]) {
         return false;
     }
 
-    let targetPiece = piecesState[getPieceIndexByPosition(target)];
+    let targetPiece = piecesState[getPieceIndexByPosition(target, piecesState)];
 
     if (targetPiece.color == selectedPiece.color) {
         return false;
@@ -349,7 +349,7 @@ function currentPieceCanAttack(selectedPiece, target) {
     return true;
 }
 
-function getPieceIndexByPosition(position) {
+function getPieceIndexByPosition(position, piecesState) {
 
     for (let i = 0; i < piecesState.length; i++) {
         

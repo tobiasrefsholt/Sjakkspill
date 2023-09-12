@@ -236,9 +236,11 @@ let serverPullInterval = setInterval( () => {
 
     if (gameReady) {
         console.log("Pulling server: Game is ready, syncing.");
-        currentView = "activeGame";
         getState(false);
-        updateView();
+        if (currentView != "activeGame") {
+            currentView = "activeGame";
+            updateView();
+        }
     }
     
 }, 1000);

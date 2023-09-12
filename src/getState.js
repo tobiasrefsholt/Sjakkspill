@@ -25,7 +25,7 @@ async function getState(request) {
     // Hvis request inneholder siste oppdateringstid, sjekk om den er eldre enn versjonen i databasen.
     // Hvis ikke, retuner false til clienten, ellers forstetter koden.
     const latestServerTimestamp = await database.getLatestStateTimestamp(request.gameId);
-    console.log("latestServerTimestamp: " + latestServerTimestamp);
+    //console.log("latestServerTimestamp: " + latestServerTimestamp);
 
     if (latestServerTimestamp <= request.lastChange) {
         stateHasChanged = false;

@@ -68,9 +68,7 @@ async function getPlayerColor(playerId, gameId) {
 
     const results = await con.promise().query(sql);
 
-    if (results[0].length === 0) return false;
-
-    return results[0][0].color;
+    return results[0][0]?.color;
 
 }
 
@@ -107,7 +105,7 @@ async function removeJoinPin(gameId) {
 async function getLatestStateTimestamp(gameId) {
 
     const sql = `SELECT latest_update FROM gamestate WHERE game_id = '${gameId}'`;
-    console.log(sql);
+    //console.log(sql);
 
     const results = await con.promise().query(sql);
 
@@ -123,6 +121,7 @@ async function getCurrentState(gameId) {
     console.log(sql);
 
     const results = await con.promise().query(sql);
+    console.log(results);
 
     if (results[0][0].length === 0) return false;
 
