@@ -24,28 +24,28 @@ app.post('/joinGame', async (request, response) => {
     const joinGame = require("./src/joinGame.js");
     const apiResponse = await joinGame.joinNewGame(request.body);
     response.header('Content-Type: application/json');
-    response.send(apiResponse);
+    response.end(JSON.stringify(apiResponse));
 });
 
 app.post('/getstate', async (request, response) => {
     const getState = require("./src/getState.js");
     const apiResponse = await getState.getState(request.body);
     response.header('Content-Type: application/json');
-    response.send(apiResponse);
+    response.end(JSON.stringify(apiResponse));
 });
 
 app.post('/getmoves', async (request, response) => {
     const getMoves = require("./src/getMoves.js");
     const apiResponse = await getMoves.currentLegalMoves(request.body);
     response.header('Content-Type: application/json');
-    response.send(apiResponse);
+    response.end(JSON.stringify(apiResponse));
 });
 
 app.post('/movepiece', async (request, response) => {
     const updateState = require("./src/updateState.js");
     const apiResponse = await updateState.movePiece(request.body);
     response.header('Content-Type: application/json');
-    response.send(apiResponse);
+    response.end(JSON.stringify(apiResponse));
 });
 
 app.listen(process.env.port, () => {
