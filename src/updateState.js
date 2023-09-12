@@ -25,7 +25,7 @@ async function movePiece(request) {
         console.log("Piece to remove: " + targetPositionIndex);
     }
 
-    const response = `Moving ${piecesState[selectedPieceIndex].color} ${piecesState[selectedPieceIndex].type} at x:${piecesState[selectedPieceIndex].position.x}, y:${piecesState[selectedPieceIndex].position.y} to x: ${targetPosition.x}, y: ${targetPosition.y}`;
+    //const response = `Moving ${piecesState[selectedPieceIndex].color} ${piecesState[selectedPieceIndex].type} at x:${piecesState[selectedPieceIndex].position.x}, y:${piecesState[selectedPieceIndex].position.y} to x: ${targetPosition.x}, y: ${targetPosition.y}`;
 
     // Change coordinates of the selected piece
     piecesState[selectedPieceIndex].position.x = targetPosition.x;
@@ -42,7 +42,7 @@ async function movePiece(request) {
         turn
     });
 
-    return response;
+    return true;
 
 }
 

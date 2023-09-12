@@ -335,15 +335,15 @@ async function getState(checkGameReady) {
 
 async function moveToCell(targetPosition) {
 
-    const data = {
+    const sendData = {
         gameId: gameId,
         playerId: playerId,
         selectedPieceIndex: selectedPieceIndex,
         targetPosition: targetPosition
     };
 
-    console.log(data);
-    console.log(JSON.stringify(data));
+    console.log(sendData);
+    console.log(JSON.stringify(sendData));
 
     const response = await fetch("/movepiece", {
         method: 'POST',
@@ -351,12 +351,15 @@ async function moveToCell(targetPosition) {
         'Accept': 'application/json',
         'Content-Type': 'application/json'
         },
-        body: JSON.stringify(data)
+        body: JSON.stringify(sendData)
     });
 
     response.json().then(data => {
         console.log(data);
         getState(false);
+        selectedPieceIndex = null;
+        currentLegalMoves = null;
+        updateView();
     });
 
 }
