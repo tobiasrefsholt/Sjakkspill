@@ -175,7 +175,7 @@ body {
     justify-content: space-around;
 }
 
-.flip-board .y-axis {
+.flip-board .y-axis, .flip-board .x-axis {
     flex-direction: column;
 }
 
