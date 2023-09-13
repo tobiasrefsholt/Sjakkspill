@@ -11,6 +11,8 @@ Ideer til å forbedre spillet
    - [x] /movePiece - Flytter en brikke til et lovlig felt. Returnerer også piecesState variablen.
   - [x] Flytte all logikk som har med å kalkulere trekk, over på backend.
   - [ ] Dobbeltsjekk at en brikke er lovlig å flytte når /movepiece blir kalt.
+  - [ ] Sjekke muligheten for å "pushe" endringer fra server til klient, i motseting til pulling metoden.
+  - [ ] Legge til en cronjob som fjerner inaktive spill eldre enn x antall dager
 
 ## Gjenkjenne stillinger
  - [ ] Vunnet stilling
@@ -21,10 +23,12 @@ Ideer til å forbedre spillet
 
 ## Andre funksjoner
 - [ ] Lagre gameId og playerId som en cookie eller lignende. Dette er for å kunne regenerere modellen hvis vinduet blir lastet på nytt.
+- [ ] Markere siste trekk fra motstander i en annen farge
+- [ ] Logg over utførte trekk
 - [ ] Bedre mobiltilpasning
 - [ ] Klokke
 - [ ] Fischersjakk?
 - [x] Vise utslåtte brikker ved siden av brettet
 
 ## Kjente bugs
-- [ ] Det skal ikke være mulig å hoppe over andre brukker med bonden (på første trekk når den kan bevege seg to felter)
+- [ ] Det skal ikke være mulig å hoppe over andre brikker med bonden (på første trekk når den kan bevege seg to felter)
