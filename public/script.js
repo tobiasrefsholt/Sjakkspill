@@ -70,8 +70,14 @@ function waitingForPlayerHTML() {
 
 function activeGameHTML() {
 
+    let flipBoardClass = '';
+
+    if (playerColor == "black") {
+        flipBoardClass = " flip-board";
+    }
+
     return /*html*/`
-        <div class="chess-board-wrapper">
+        <div class="chess-board-wrapper${flipBoardClass}">
             <h1 class="show-turn">${turn}'s turn</h1>
             ${boardViewHTML()}
             <div class="x-axis"><span>A</span><span>B</span><span>C</span><span>D</span><span>E</span><span>F</span><span>G</span><span>H</span></div>
