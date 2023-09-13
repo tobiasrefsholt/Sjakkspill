@@ -175,8 +175,12 @@ body {
     justify-content: space-around;
 }
 
-.flip-board .y-axis, .flip-board .x-axis {
+.flip-board .y-axis {
     flex-direction: column;
+}
+
+.flip-board .x-axis {
+    flex-direction: row-reverse;
 }
 
 .flip-board #chess-board, .flip-board #chess-board .cell {
