@@ -330,7 +330,7 @@ async function getState(checkGameReady) {
         if (!data.hasChanged) return;
         turn = data.turn;
         lastChange = data.lastChange;
-        piecesState = data.piecesState;
+        piecesState = JSON.parse(data.piecesState);
         currentView = "activeGame";
         updateView();
     });

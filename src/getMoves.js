@@ -11,14 +11,18 @@ async function currentLegalMoves(request) {
     let selectedPieceIndex = parseInt(request.selectedPieceIndex);
     let state = await database.getCurrentState(request.gameId); /* Returns {piecesState, turn} if gameId exists, else false */
     
-    piecesState = state.pieces_state;
+    piecesState = JSON.parse(state.pieces_state);
     turn = state.turn;
 
     if (!state) return {"error": "GameId not found in database"};
 
+    console.log("selectedPieceIndex: " + selectedPieceIndex);
+
     let legalMoves = calculateLegalMoves(selectedPieceIndex); /* Returns array of coordinate objects */
 
-    if (legalMoves.error) return legalMoves.error;
+    if (legalMoves.error) return legalMoves;
+
+    console.log("legalmoves: " + JSON.stringify(legalMoves))
 
     return legalMoves;
 

@@ -9,13 +9,19 @@ async function movePiece(request) {
     if (!request.selectedPieceIndex) return { error: "selectedPieceIndex er ikke definert" };
     if (!request.targetPosition) return { error: "targetPosition er ikke definert" };
 
+    console.log("request: " + request);
+    console.log("JSON.stringify(request): " + JSON.stringify(request));
+
     const { gameId, playerId, selectedPieceIndex, targetPosition } = request;
-    let { pieces_state: piecesState, turn } = await database.getCurrentState(gameId);
+    let { pieces_state: piecesStateAsJSON, turn } = await database.getCurrentState(gameId);
+    let piecesState = JSON.parse(piecesStateAsJSON);
     const canMove = await playerCanMove(playerId, gameId, turn);
+
+    console.log("player can move: " + canMove);
 
     if (!canMove) return { error: "Not your turn" }
 
-    console.log(piecesState);
+    console.log("piecesState: " + piecesState);
 
     // If there is a piece at the target field, disable it.
     let targetPositionIndex = getMoves.getPieceIndexByPosition(targetPosition, piecesState);
@@ -48,11 +54,13 @@ async function movePiece(request) {
 
 async function playerCanMove(playerId, gameId, turn) {
 
+    console.log("Checking if player can move");
+
     let currentPlayerColor = await database.getPlayerColor(playerId, gameId);
 
     console.log("currentPlayerColor: " + currentPlayerColor);
 
-    return (currentPlayerColor == turn) ? currentPlayerColor : false;
+    return (currentPlayerColor == turn) ? true : false;
 
 }
 

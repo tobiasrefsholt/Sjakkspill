@@ -97,7 +97,7 @@ async function removeJoinPin(gameId) {
     con.query(sql, async function (err, result) {
         if (err) throw err;
         
-        console.log(result);
+        /* console.log(result); */
     });
     
 }
@@ -118,10 +118,10 @@ async function getLatestStateTimestamp(gameId) {
 async function getCurrentState(gameId) {
 
     const sql = `SELECT pieces_state, turn FROM gamestate WHERE game_id = '${gameId}'`;
-    console.log(sql);
+    //console.log(sql);
 
     const results = await con.promise().query(sql);
-    console.log(results);
+    console.log("database.getCurrentState: " + results);
 
     if (results[0][0].length === 0) return false;
 
@@ -144,7 +144,7 @@ async function updateState(gameId, state) {
     con.query(sql, async function (err, result) {
         if (err) throw err;
         
-        console.log(result);
+        /* console.log(result); */
     });
 }
 
