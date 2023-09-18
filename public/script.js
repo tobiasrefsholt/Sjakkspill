@@ -1,31 +1,40 @@
+"use strict";
+
 // Model
 
-const icons = {
-    pawn: "♟",
-    bishop: "♝",
-    knight: "♞",
-    rook: "♜",
-    queen: "♛",
-    king: "♚"
+const model = {
+    icons: {
+        pawn: "♟",
+        bishop: "♝",
+        knight: "♞",
+        rook: "♜",
+        queen: "♛",
+        king: "♚"
+    },
+    gameState: {
+        joinPin: null,
+        gameReady: null,
+        gameId: null,
+        playerId: null,
+        playerColor: null,
+        lastChange: null,
+        turn: null
+    },
+    piecesState: {
+        pieces: [],
+        selectedIndex: null,
+        currentLegalMoves: [],
+        latestOpponentMove: {
+            from: [],
+            to: []
+        },
+        transcript: []
+    },
+    errorMessages: {
+        join: null,
+    },
+    currentView: "main-menu"
 }
-
-let selectedPieceIndex;
-let currentLegalMoves;
-let playerColor;
-
-let joinError = null;
-
-// True when opponent has joined
-let gameReady = false;
-
-// Syncs from api
-let gameId;
-let joinPin = null;
-let lastChange = 0;
-let piecesState = [];
-let playerId;
-let turn;
-
 
 // View
 
@@ -62,7 +71,7 @@ function waitingForPlayerHTML() {
         <div class="waiting-for-player">
             <h1>Waiting for player to join</h1>
             <p>Share this code with your opponent, so they can join the game.</p>
-            <span>${joinPin}</span>
+            <span>${model.gameState.joinPin}</span>
         </div>
     `;
 
@@ -72,13 +81,13 @@ function activeGameHTML() {
 
     let flipBoardClass = '';
 
-    if (playerColor == "black") {
+    if (model.gameState.playerColor == "black") {
         flipBoardClass = " flip-board";
     }
 
     return /*html*/`
         <div class="chess-board-wrapper${flipBoardClass}">
-            <h1 class="show-turn">${turn}'s turn</h1>
+            <h1 class="show-turn">${model.gameState.turn}'s turn</h1>
             ${boardViewHTML()}
             <div class="x-axis"><span>A</span><span>B</span><span>C</span><span>D</span><span>E</span><span>F</span><span>G</span><span>H</span></div>
             <div class="y-axis"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span></div>
@@ -108,10 +117,10 @@ function mainMenuHTML() {
                         type="number"
                         id="join-code"
                         placeholder="000000"
-                        oninput="joinPin = this.value"
+                        oninput="model.gameState.joinPin = this.value"
                     />
                 </p>
-                <p>${joinError || ''}</p>
+                <p>${model.errorMessages.join || ''}</p>
                 <button onclick="joinGame()">Join</button>
             </div>
             <div class="menu-card">
@@ -144,7 +153,7 @@ function disabledPiecesHTML(color) {
     for (let i=0; i<disabledPiecesIndex.length; i++) {
         html += /*html*/`
             <div class="${pieceClass}" piece-index="${disabledPiecesIndex[i]}">
-                ${icons[piecesState[disabledPiecesIndex[i]].type]}
+                ${model.icons[model.piecesState.pieces[disabledPiecesIndex[i]].type]}
             </div>
         `;
     }
@@ -184,7 +193,7 @@ function boardRowView(rowParity, rowCount) {
     for (let colCount = 1; colCount <= 8; colCount++) {
         let cellColor = ( (colCount+CellParityOffest) % 2 == 0 ) ? 'black' : 'white';
 
-        if (currentLegalMoves && currentLegalMoves.some(position => position.x == colCount && position.y == rowCount)) {
+        if (model.piecesState.currentLegalMoves && model.piecesState.currentLegalMoves.some(position => position.x == colCount && position.y == rowCount)) {
             html += /*html*/`
             <div class="cell cell-legal-move" row="${rowCount}" col="${colCount}"></div>
             `;
@@ -203,17 +212,17 @@ function updatePiecesView() {
 
     let activePieceClass = '';
 
-    for (let i=0; i<piecesState.length; i++) {
+    for (let i=0; i<model.piecesState.pieces.length; i++) {
 
-        if (!piecesState[i].disabled) {
-            let piece = piecesState[i];
-            let icon = icons[piece.type];
+        if (!model.piecesState.pieces[i].disabled) {
+            let piece = model.piecesState.pieces[i];
+            let icon = model.icons[piece.type];
             let targetCell = app.querySelector(`.cell[row="${piece.position.y}"][col="${piece.position.x}"]`);
             targetCell.innerHTML = icon;
             targetCell.classList.add(`${piece.color}-piece`);
             targetCell.setAttribute("piece-index", i);
             
-            if (i === selectedPieceIndex) {
+            if (i === model.piecesState.selectedIndex) {
                 targetCell.classList.add("selected-piece");
             }
         }
@@ -227,20 +236,20 @@ function updatePiecesView() {
 
 let serverPullInterval = setInterval( () => {
     
-    if (!gameId) return;
+    if (!model.gameState.gameId) return;
 
-    if (!gameReady) {
+    if (!model.gameState.gameReady) {
         console.log("Pulling server: Game is not ready!");
         getState(true);
         return;
     } 
     
-    if (gameReady && turn == playerColor && currentView == "activeGame") {
+    if (model.gameState.gameReady && model.gameState.turn == model.gameState.playerColor && currentView == "activeGame") {
         console.log("Waiting for player to move");
         return;
     }
 
-    if (gameReady) {
+    if (model.gameState.gameReady) {
         console.log("Pulling server: Game is ready, syncing.");
         getState(false);
         if (currentView != "activeGame") {
@@ -264,13 +273,13 @@ async function createNewGame() {
     response.json().then(data => {
         console.log(data);
         // Update local variables
-        gameId = data.gameId;
-        joinPin = data.joinPin;
-        lastChange = data.lastChange;
-        piecesState = data.piecesState;
-        playerId = data.playerId;
-        turn = data.turn;
-        playerColor = "white"   // Set playerColor = white for game starter. This will probably change at some time.
+        model.gameState.gameId = data.gameId;
+        model.gameState.playerId = data.playerId;
+        model.gameState.playerColor = "white"   // Set playerColor = white for game starter. This will probably change at some time.
+        model.gameState.joinPin = data.joinPin;
+        model.gameState.lastChange = data.lastChange;
+        model.gameState.turn = data.turn;
+        model.piecesState.pieces = data.piecesState;
 
         // Change current view to "Waiting for player"
         currentView = "waitingForPlayer";
@@ -282,7 +291,7 @@ async function createNewGame() {
 async function joinGame() {
 
     const payload = {
-        joinPin
+        joinPin: model.gameState.joinPin
     }
 
     const response = await fetch("/joinGame", {
@@ -297,13 +306,13 @@ async function joinGame() {
     response.json().then(async data => {
         console.log(data);
         if (data.error) {
-            joinError = data.error;
+            model.errorMessages.join = data.error;
             updateView();
             return;
         }
-        playerId = data.playerId;
-        gameId = data.gameId;
-        playerColor = "black" // Set playerColor = black for 2nd player.
+        model.gameState.playerId = data.playerId;
+        model.gameState.gameId = data.gameId;
+        model.gameState.playerColor = "black" // Set playerColor = black for 2nd player.
         getState(false);
     });
 
@@ -312,9 +321,9 @@ async function joinGame() {
 async function getState(checkGameReady) {
 
     const payload = {
-        gameId,
-        playerId,
-        lastChange,
+        gameId: model.gameState.gameId,
+        playerId: model.gameState.playerId,
+        lastChange: model.gameState.lastChange,
         checkGameReady
     }
 
@@ -330,13 +339,13 @@ async function getState(checkGameReady) {
     response.json().then(data => {
         console.log(data);
         if (checkGameReady) {
-            gameReady = data.gameReady;
+            model.gameState.gameReady = data.gameReady;
             return;
         }
         if (!data.hasChanged) return;
-        turn = data.turn;
-        lastChange = data.lastChange;
-        piecesState = JSON.parse(data.piecesState);
+        model.gameState.turn = data.turn;
+        model.gameState.lastChange = data.lastChange;
+        model.piecesState.pieces = JSON.parse(data.piecesState);
         currentView = "activeGame";
         updateView();
     });
@@ -346,9 +355,9 @@ async function getState(checkGameReady) {
 async function moveToCell(targetPosition) {
 
     const payload = {
-        gameId: gameId,
-        playerId: playerId,
-        selectedPieceIndex: selectedPieceIndex,
+        gameId: model.gameState.gameId,
+        playerId: model.gameState.playerId,
+        selectedPieceIndex: model.piecesState.selectedIndex,
         targetPosition: targetPosition
     };
 
@@ -363,8 +372,8 @@ async function moveToCell(targetPosition) {
 
     response.json().then(data => {
         console.log(data);
-        selectedPieceIndex = null;
-        currentLegalMoves = null;
+        model.piecesState.selectedIndex = null;
+        model.piecesState.currentLegalMoves = null;
         getState(false);
     });
 
@@ -373,7 +382,7 @@ async function moveToCell(targetPosition) {
 async function getLegalMoves(index) {
 
     const payload = {
-        gameId,
+        gameId: model.gameState.gameId,
         selectedPieceIndex: index
     }
 
@@ -389,7 +398,7 @@ async function getLegalMoves(index) {
     response.json().then(async data => {
         console.log(data);
         if (data.error) { alert(data.error); return; }
-        currentLegalMoves = data;
+        model.piecesState.currentLegalMoves = data;
         updateView();
     });
     
@@ -398,14 +407,14 @@ async function getLegalMoves(index) {
 function selectPiece(index) {
 
     // If empty cell or enemy piece, reset variables and update view
-    if ( !index && index !== 0 || piecesState[index].color !== turn ) {
-        selectedPieceIndex = null;
-        currentLegalMoves = [];
+    if ( !index && index !== 0 || model.piecesState.pieces[index].color !== model.gameState.turn ) {
+        model.piecesState.selectedIndex = null;
+        model.piecesState.currentLegalMoves = [];
         updateView();
         return;
     }
 
-    selectedPieceIndex = index;
+    model.piecesState.selectedIndex = index;
     getLegalMoves(index);
 
 }
@@ -414,9 +423,9 @@ function getDisabledPiecesIndex(color) {
 
     let disabledPieces = [];
 
-    for (let i = 0; i < piecesState.length; i++) {
+    for (let i = 0; i < model.piecesState.pieces.length; i++) {
         
-        if (piecesState[i].disabled && piecesState[i].color == color) {
+        if (model.piecesState.pieces[i].disabled && model.piecesState.pieces[i].color == color) {
             disabledPieces.push(i);
         }
 
@@ -428,7 +437,7 @@ function getDisabledPiecesIndex(color) {
 
 function addEventListenersOnPieces() {
 
-    if (turn !== playerColor) return;
+    if (model.gameState.turn !== model.gameState.playerColor) return;
 
     document.querySelectorAll('.cell:not(.cell-legal-move)').forEach(cell => {
 
