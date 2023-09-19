@@ -12,6 +12,11 @@ Ideer til å forbedre spillet
   - [x] Flytte all logikk som har med å kalkulere trekk, over på backend.
   - [ ] Dobbeltsjekk at en brikke er lovlig å flytte når /movepiece blir kalt.
   - [ ] Sjekke muligheten for å "pushe" endringer fra server til klient, i motseting til pulling metoden.
+     - Server sent events
+       - https://www.digitalocean.com/community/tutorials/nodejs-server-sent-events-build-realtime-app
+       - https://github.com/lucasjellema/nodejs-serversentevents-quickstart/tree/master
+       - https://technology.amis.nl/frontend/server-sent-events-from-node-js-to-web-client-pushing-user-command-line-input-to-all-subscribed-browser-sessions/
+       - https://blog.q-bit.me/how-to-use-nodejs-for-server-sent-events-sse/
   - [ ] Legge til en cronjob som fjerner inaktive spill eldre enn x antall dager
 
 ## Gjenkjenne stillinger
