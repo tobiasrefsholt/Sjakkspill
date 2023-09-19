@@ -23,8 +23,9 @@ async function joinNewGame(request) {
     await database.addBlackPlayerToGamestate(playerId, gameId);
 
     return {
+        gameId,
         playerId,
-        gameId
+        playerColor: "black"
     };
 
 }

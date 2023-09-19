@@ -20,6 +20,7 @@ function createNewGame() {
         gameId,
         joinPin,
         playerId: firstPlayerId,
+        playerColor: "white",
         turn: "white",
         lastChange: timestamp,
         piecesState: getInitialPiecesState(),

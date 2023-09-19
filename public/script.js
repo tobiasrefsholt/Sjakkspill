@@ -275,7 +275,7 @@ async function createNewGame() {
         // Update local variables
         model.gameState.gameId = data.gameId;
         model.gameState.playerId = data.playerId;
-        model.gameState.playerColor = "white"   // Set playerColor = white for game starter. This will probably change at some time.
+        model.gameState.playerColor = data.playerColor;
         model.gameState.joinPin = data.joinPin;
         model.gameState.lastChange = data.lastChange;
         model.gameState.turn = data.turn;
@@ -310,9 +310,9 @@ async function joinGame() {
             updateView();
             return;
         }
-        model.gameState.playerId = data.playerId;
         model.gameState.gameId = data.gameId;
-        model.gameState.playerColor = "black" // Set playerColor = black for 2nd player.
+        model.gameState.playerId = data.playerId;
+        model.gameState.playerColor = data.playerColor; // Set playerColor = black for 2nd player.
         getState(false);
     });
 
