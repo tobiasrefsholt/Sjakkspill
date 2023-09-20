@@ -18,7 +18,8 @@ const model = {
         playerId: null,
         playerColor: null,
         lastChange: null,
-        turn: null
+        turn: null,
+        opponentName: null
     },
     piecesState: {
         pieces: [],
@@ -123,18 +124,53 @@ function mainMenuHTML() {
                 <p>${model.errorMessages.join || ''}</p>
                 <button onclick="joinGame()">Join</button>
             </div>
-            <div class="menu-card">
+            <!-- <div class="menu-card">
                 <h2>Play offline</h2>
                 <p>If you want to play against yourself, you can start an offline game here!</p>
                 <button onclick="playOffline()">New offline game</button>
-            </div>
-            <div class="menu-card">
+            </div> -->
+            <div class="menu-card active-games">
                 <h2>Your active games</h2>
-                <p>Jump back into one of your games:</p>
+                ${listActiveGamesHTML()}
             </div>
         </div>
     `;
 
+}
+
+function listActiveGamesHTML() {
+    let savedRoundsJSON = localStorage.getItem("savedRounds");
+
+    if (savedRoundsJSON == null) {
+        return "<p>No saved games</p>"
+    }
+
+    let savedRounds = JSON.parse(savedRoundsJSON);
+
+    let listHTML = '';
+
+    for (let round of savedRounds) {
+        listHTML += /* html */ `
+            <div class="active-games-row">
+                <div>${round.opponentName}</div>
+                <div>${round.date}</div>
+                <button onclick="removeFromLocalStorage('${round.gameId}', '${round.playerId}')" style="background-color: darkred">X</button>
+                <button onclick="resumeFromLocalStorage('${round.gameId}', '${round.playerId}', '${round.playerColor}')">Continue</button>
+            </div>
+        `;
+    }
+
+    return /* html */`
+        <div class="active-games-grid">
+            <!-- <tr>
+                <th></th>
+                <th>Opponent</th>
+                <th>Date started</th>
+                <th></th>
+            </tr> -->
+            ${listHTML}
+        </div>
+    `;
 }
 
 function disabledPiecesHTML(color) {
@@ -281,6 +317,8 @@ async function createNewGame() {
         model.gameState.turn = data.turn;
         model.piecesState.pieces = data.piecesState;
 
+        setLocalStorage();
+
         // Change current view to "Waiting for player"
         currentView = "waitingForPlayer";
         updateView();
@@ -313,8 +351,21 @@ async function joinGame() {
         model.gameState.gameId = data.gameId;
         model.gameState.playerId = data.playerId;
         model.gameState.playerColor = data.playerColor; // Set playerColor = black for 2nd player.
+
+        setLocalStorage();
+
         getState(false);
     });
+
+}
+
+function resumeFromLocalStorage(gameId, playerId, playerColor) {
+
+    model.gameState.gameId = gameId;
+    model.gameState.playerId = playerId;
+    model.gameState.playerColor = playerColor;
+
+    getState(false);
 
 }
 
@@ -433,6 +484,55 @@ function getDisabledPiecesIndex(color) {
 
     return disabledPieces;
 
+}
+
+function setLocalStorage() {
+    let savedRoundsJSON = localStorage.getItem("savedRounds");
+    const addToSavedRounds = {
+        gameId: model.gameState.gameId,
+        playerId: model.gameState.playerId,
+        playerColor: model.gameState.playerColor,
+        opponentName: model.gameState.opponentName,
+        date: new Date().toLocaleString()
+    };
+
+    let savedRounds = JSON.parse(savedRoundsJSON);
+    if (savedRounds) {
+        savedRounds.unshift(addToSavedRounds);
+    } else {
+        savedRounds = [addToSavedRounds];
+    }
+
+    savedRoundsJSON = JSON.stringify(savedRounds);
+    localStorage.setItem("savedRounds", savedRoundsJSON);
+}
+
+function removeFromLocalStorage(gameIdToRemove, playerId) {
+    let savedRoundsJSON = localStorage.getItem("savedRounds");
+    let savedRounds = JSON.parse(savedRoundsJSON);
+    let roundIndexToRemove = null;
+
+    for (let i=0; i < savedRounds.length; i++) {
+        let round = savedRounds[i];
+        if (round.gameId == gameIdToRemove && round.playerId == playerId) {
+            roundIndexToRemove = i;
+            break;
+        }
+    }
+
+    if (roundIndexToRemove === null) return;
+    
+    console.log("roundIndexToRemove: " + roundIndexToRemove);
+    savedRounds.splice(roundIndexToRemove, 1);
+
+    if (savedRounds.length) {
+        savedRoundsJSON = JSON.stringify(savedRounds);
+        localStorage.setItem("savedRounds", savedRoundsJSON);
+    } else {
+        localStorage.removeItem("savedRounds");
+    }
+    
+    updateView();
 }
 
 function addEventListenersOnPieces() {

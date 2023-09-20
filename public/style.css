@@ -1,5 +1,6 @@
 body {
     margin: 0;
+    font-size: 1.2rem;
 }
 
 * {
@@ -19,7 +20,7 @@ body {
 .main-menu {
     display: grid;
     gap: 1.5rem;
-    grid-template-columns: 20rem 20rem;
+    grid-template-columns: 25rem 25rem;
 }
 
 .main-menu .title {
@@ -33,6 +34,10 @@ body {
     border-radius: .5rem;
 }
 
+.main-menu .menu-card.active-games {
+    grid-column: 1/3;
+}
+
 .main-menu button {
     padding: .5rem 1rem;
     border: none;
@@ -40,8 +45,45 @@ body {
     color: white;
     background-color: black;
     font-weight: bold;
-    font-size: 1rem;
+    font-size: 1em;
     cursor: pointer;
+}
+
+.main-menu .join-local-game-button {
+    background-color: unset;
+    padding: 0;
+    margin: 0 .5rem;
+}
+
+.main-menu .active-games-row {
+    padding: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    border-radius: .5rem;
+    margin-bottom: 1rem;
+}
+
+.main-menu .active-games-row:nth-child(odd) {
+    background-color: #00000050;
+}
+
+.main-menu .active-games-row:nth-child(even) {
+    background-color: #00000025;
+}
+
+.main-menu .active-games-row div:first-child {
+    flex-grow: 1;
+}
+
+.main-menu table td {
+    padding: 1rem;
+    margin: 0;
+}
+
+.main-menu table button {
+    margin: 0;
 }
 
 .main-menu input {
