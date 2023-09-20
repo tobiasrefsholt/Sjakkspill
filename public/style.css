@@ -23,100 +23,73 @@ body {
     grid-template-columns: 25rem 25rem;
 }
 
-.main-menu .title {
-    grid-column: 1/3;
-    text-align: center;
-}
+    .main-menu .title {
+        grid-column: 1/3;
+        text-align: center;
+    }
 
-.main-menu .menu-card {
-    background-color: #00000050;
-    padding: 1.5rem;
-    border-radius: .5rem;
-}
+    .main-menu .menu-card {
+        background-color: #00000050;
+        padding: 1.5rem;
+        border-radius: .5rem;
+    }
 
-.main-menu .menu-card.active-games {
-    grid-column: 1/3;
-}
+    .main-menu .menu-card.active-games {
+        grid-column: 1/3;
+    }
 
-.main-menu button {
-    padding: .5rem 1rem;
-    border: none;
-    border-radius: .5rem;
-    color: white;
-    background-color: black;
-    font-weight: bold;
-    font-size: 1em;
-    cursor: pointer;
-}
+    .main-menu button {
+        padding: .5rem 1rem;
+        border: none;
+        border-radius: .5rem;
+        color: white;
+        background-color: black;
+        font-weight: bold;
+        font-size: 1em;
+        cursor: pointer;
+    }
 
-.main-menu .join-local-game-button {
-    background-color: unset;
-    padding: 0;
-    margin: 0 .5rem;
-}
+    .main-menu .active-games-row {
+        padding: 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+        border-radius: .5rem;
+        margin-bottom: 1rem;
+    }
 
-.main-menu .active-games-row {
-    padding: 1rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 1rem;
-    border-radius: .5rem;
-    margin-bottom: 1rem;
-}
+    .main-menu .active-games-row:nth-child(odd) {
+        background-color: #00000050;
+    }
 
-.main-menu .active-games-row:nth-child(odd) {
-    background-color: #00000050;
-}
+    .main-menu .active-games-row:nth-child(even) {
+        background-color: #00000025;
+    }
 
-.main-menu .active-games-row:nth-child(even) {
-    background-color: #00000025;
-}
+    .main-menu .active-games-row div:first-child {
+        flex-grow: 1;
+    }
 
-.main-menu .active-games-row div:first-child {
-    flex-grow: 1;
-}
-
-.main-menu table td {
-    padding: 1rem;
-    margin: 0;
-}
-
-.main-menu table button {
-    margin: 0;
-}
-
-.main-menu input {
-    background-color: transparent;
-    padding: .5rem 1rem;
-    border: solid #ffffff20 1px;
-    border-radius: .5rem;
-    color: white;
-    font-weight: bold;
-    font-size: 3rem;
-    width: 100%;
-}
+    .main-menu input {
+        background-color: transparent;
+        padding: .5rem 1rem;
+        border: solid #ffffff20 1px;
+        border-radius: .5rem;
+        color: white;
+        font-weight: bold;
+        font-size: 3rem;
+        width: 100%;
+    }
 
 .waiting-for-player {
     text-align: center;
 }
 
-.waiting-for-player span {
-    font-size: 3rem;
-    font-weight: bold;
-}
-
-.chess-board-wrapper {
-    display: grid;
-    grid-template-columns: min-content 70vh 30rem;
-    grid-template-rows: min-content 70vh min-content;
-    grid-template-areas: 
-    ".      header          .      "
-    "y      chess-board     sidebar"
-    ".      x               .      ";
-    gap: 1.5rem;
-    user-select: none;
-}
+    .waiting-for-player span {
+        font-size: 3rem;
+        font-weight: bold;
+    }
 
 .sidebar {
     grid-area: sidebar;
@@ -156,6 +129,18 @@ body {
         width: 50px;
         height: 50%;
     }
+
+.chess-board-wrapper {
+    display: grid;
+    grid-template-columns: min-content 70vh 30rem;
+    grid-template-rows: min-content 70vh min-content;
+    grid-template-areas: 
+    ".      header          .      "
+    "y      chess-board     sidebar"
+    ".      x               .      ";
+    gap: 1.5rem;
+    user-select: none;
+}
 
 #chess-board {
     grid-area: chess-board;
