@@ -27,7 +27,7 @@ Ideer til å forbedre spillet
  - [ ] Bytte bonde til ny brikke, hvis på andre siden av brettet
 
 ## Andre funksjoner
-- [ ] Lagre gameId og playerId som en cookie eller lignende. Dette er for å kunne regenerere modellen hvis vinduet blir lastet på nytt.
+- [x] Lagre gameId og playerId som en cookie eller lignende. Dette er for å kunne regenerere modellen hvis vinduet blir lastet på nytt.
 - [ ] Markere siste trekk fra motstander i en annen farge
 - [ ] Logg over utførte trekk
 - [ ] Bedre mobiltilpasning
