@@ -131,11 +131,15 @@ async function getCurrentState(gameId) {
 
 async function updateState(gameId, state) {
 
+    const lastMove = (state.lastMove) ? `last_move = '${state.lastMove}'` : "last_move = NULL";
+
     const sql = `UPDATE gamestate
         SET
             pieces_state = '${state.piecesState}',
             turn = '${state.turn}',
-            latest_update = '${state.timestamp}'
+            latest_update = '${state.timestamp}',
+            ${lastMove}
+            
         WHERE
             game_id = '${gameId}'
     `;

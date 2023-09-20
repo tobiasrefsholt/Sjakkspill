@@ -23,6 +23,14 @@ async function movePiece(request) {
 
     console.log("piecesState: " + piecesState);
 
+    const lastMove = {
+        color: turn,
+        from: { ...piecesState[selectedPieceIndex].position },
+        to: targetPosition,
+    }
+
+    const lastMoveJSON = (lastMove.from && lastMove.to) ? JSON.stringify(lastMove) : null;
+
     // If there is a piece at the target field, disable it.
     let targetPositionIndex = getMoves.getPieceIndexByPosition(targetPosition, piecesState);
 
@@ -30,8 +38,6 @@ async function movePiece(request) {
         piecesState[targetPositionIndex].disabled = true;
         console.log("Piece to remove: " + targetPositionIndex);
     }
-
-    //const response = `Moving ${piecesState[selectedPieceIndex].color} ${piecesState[selectedPieceIndex].type} at x:${piecesState[selectedPieceIndex].position.x}, y:${piecesState[selectedPieceIndex].position.y} to x: ${targetPosition.x}, y: ${targetPosition.y}`;
 
     // Change coordinates of the selected piece
     piecesState[selectedPieceIndex].position.x = targetPosition.x;
@@ -42,8 +48,10 @@ async function movePiece(request) {
 
     turn = ( turn == "white" ) ? "black" : "white";
 
+
     database.updateState(gameId, {
         piecesState: JSON.stringify(piecesState),
+        lastMove: lastMoveJSON,
         timestamp,
         turn
     });
