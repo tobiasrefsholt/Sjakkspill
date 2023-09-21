@@ -39,6 +39,7 @@ async function getState(request) {
         hasChanged: true,
         turn: state.turn,
         lastChange: latestServerTimestamp,
+        lastMove: state.last_move,
         piecesState: state.pieces_state
     };
 

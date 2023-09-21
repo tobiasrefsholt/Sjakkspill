@@ -117,7 +117,7 @@ async function getLatestStateTimestamp(gameId) {
 
 async function getCurrentState(gameId) {
 
-    const sql = `SELECT pieces_state, turn FROM gamestate WHERE game_id = '${gameId}'`;
+    const sql = `SELECT pieces_state, turn, last_move FROM gamestate WHERE game_id = '${gameId}'`;
     //console.log(sql);
 
     const results = await con.promise().query(sql);

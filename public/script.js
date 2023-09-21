@@ -18,6 +18,17 @@ const model = {
         playerId: null,
         playerColor: null,
         lastChange: null,
+        lastMove: {
+            color: null,
+            from: {
+                x: null,
+                y: null,
+            },
+            to: {
+                x: null,
+                y: null,
+            }
+        },
         turn: null,
         opponentName: null
     },
@@ -229,15 +240,32 @@ function boardRowView(rowParity, rowCount) {
     for (let colCount = 1; colCount <= 8; colCount++) {
         let cellColor = ( (colCount+CellParityOffest) % 2 == 0 ) ? 'black' : 'white';
 
+        // Sjekk om denne cellen er et lovlig trekk. Hvis den er det, legg til cell-legal-move klassen.
         if (model.piecesState.currentLegalMoves && model.piecesState.currentLegalMoves.some(position => position.x == colCount && position.y == rowCount)) {
             html += /*html*/`
-            <div class="cell cell-legal-move" row="${rowCount}" col="${colCount}"></div>
+                <div class="cell cell-legal-move" row="${rowCount}" col="${colCount}"></div>
             `;
-        } else {
-            html += /*html*/`
-            <div class="cell cell-${cellColor}" row="${rowCount}" col="${colCount}"></div>
-            `;
+            continue;
         }
+        
+        // Sjekk om forrige trekk fra motstanderen ble gjort fra/til denne cellen og gi den en egen bakgrunnsfarge.
+        if ( 
+            (model.gameState.playerColor != model.gameState.lastMove.color) 
+            && ( (model.gameState.lastMove.from.x == colCount && model.gameState.lastMove.from.y == rowCount)
+                || (model.gameState.lastMove.to.x == colCount && model.gameState.lastMove.to.y == rowCount)
+            )
+        ) {
+
+            html += /*html*/`
+                <div class="cell last-move" row="${rowCount}" col="${colCount}"></div>
+            `;
+            continue;
+        }
+
+        // Hvis ingen av if-setningene slår inn, sett standard farge.
+        html += /*html*/`
+            <div class="cell cell-${cellColor}" row="${rowCount}" col="${colCount}"></div>
+        `;
     }
 
     return html;
@@ -275,18 +303,18 @@ let serverPullInterval = setInterval( () => {
     if (!model.gameState.gameId) return;
 
     if (!model.gameState.gameReady) {
-        console.log("Pulling server: Game is not ready!");
+        /* console.log("Pulling server: Game is not ready!"); */
         getState(true);
         return;
     } 
     
     if (model.gameState.gameReady && model.gameState.turn == model.gameState.playerColor && currentView == "activeGame") {
-        console.log("Waiting for player to move");
+        /* console.log("Waiting for player to move"); */
         return;
     }
 
     if (model.gameState.gameReady) {
-        console.log("Pulling server: Game is ready, syncing.");
+        /* console.log("Pulling server: Game is ready, syncing."); */
         getState(false);
         if (currentView != "activeGame") {
             currentView = "activeGame";
@@ -388,7 +416,7 @@ async function getState(checkGameReady) {
     });
 
     response.json().then(data => {
-        console.log(data);
+        /* console.log(data); */
         if (checkGameReady) {
             model.gameState.gameReady = data.gameReady;
             return;
@@ -397,6 +425,7 @@ async function getState(checkGameReady) {
         model.gameState.turn = data.turn;
         model.gameState.lastChange = data.lastChange;
         model.piecesState.pieces = JSON.parse(data.piecesState);
+        if (data.lastMove) model.gameState.lastMove = JSON.parse(data.lastMove);
         currentView = "activeGame";
         updateView();
     });

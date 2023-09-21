@@ -168,6 +168,10 @@ body {
         background-color: lightgreen;
     }
 
+    #chess-board .last-move {
+        background-color: lightcoral;
+    }
+
     #chess-board .cell {
         display: flex;
         align-items: center;
