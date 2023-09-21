@@ -140,10 +140,7 @@ function mainMenuHTML() {
                 <p>If you want to play against yourself, you can start an offline game here!</p>
                 <button onclick="playOffline()">New offline game</button>
             </div> -->
-            <div class="menu-card active-games">
-                <h2>Your active games</h2>
-                ${listActiveGamesHTML()}
-            </div>
+            ${listActiveGamesHTML()}
         </div>
     `;
 
@@ -152,9 +149,7 @@ function mainMenuHTML() {
 function listActiveGamesHTML() {
     let savedRoundsJSON = localStorage.getItem("savedRounds");
 
-    if (savedRoundsJSON == null) {
-        return "<p>No saved games</p>"
-    }
+    if (savedRoundsJSON == null) return '';
 
     let savedRounds = JSON.parse(savedRoundsJSON);
 
@@ -172,13 +167,8 @@ function listActiveGamesHTML() {
     }
 
     return /* html */`
-        <div class="active-games-grid">
-            <!-- <tr>
-                <th></th>
-                <th>Opponent</th>
-                <th>Date started</th>
-                <th></th>
-            </tr> -->
+        <div class="menu-card active-games">
+            <h2>Your active games</h2>
             ${listHTML}
         </div>
     `;
