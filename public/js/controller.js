@@ -18,7 +18,7 @@ let serverPullInterval = setInterval( () => {
     if (model.gameState.gameReady) {
         /* console.log("Pulling server: Game is ready, syncing."); */
         getState(false);
-        if (model.app.currentView != "activeGame") {
+        if (model.app.currentView != "activeGame" && model.app.currentView != "setOpponentName") {
             model.app.currentView = "activeGame";
             updateView();
         }
@@ -47,13 +47,23 @@ async function createNewGame() {
         model.gameState.turn = data.turn;
         model.piecesState.pieces = data.piecesState;
 
-        setLocalStorage();
-
         // Change current view to "Waiting for player"
-        model.app.currentView = "waitingForPlayer";
+        model.app.currentView = "setOpponentName";
         updateView();
     });
 
+}
+
+function setOpponentName() {
+    model.gameState.opponentName = model.fields.gameName;
+    setLocalStorage();
+
+    if (model.gameState.gameReady) {
+        model.app.currentView = "activeGame";
+    } else {
+        model.app.currentView = "waitingForPlayer";
+    }
+    updateView();
 }
 
 async function joinGame() {
@@ -81,10 +91,8 @@ async function joinGame() {
         model.gameState.gameId = data.gameId;
         model.gameState.playerId = data.playerId;
         model.gameState.playerColor = data.playerColor; // Set playerColor = black for 2nd player.
-
-        setLocalStorage();
-
-        getState(false);
+        model.app.currentView = "setOpponentName";
+        updateView();
     });
 
 }
@@ -128,8 +136,9 @@ async function getState(checkGameReady) {
         model.gameState.lastChange = data.lastChange;
         model.piecesState.pieces = JSON.parse(data.piecesState);
         if (data.lastMove) model.gameState.lastMove = JSON.parse(data.lastMove);
-        model.app.currentView = "activeGame";
-        updateView();
+        if (model.app.currentView == "activeGame") {
+            updateView();
+        }
     });
 
 }

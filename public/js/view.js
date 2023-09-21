@@ -16,6 +16,19 @@ function updateView() {
         return;
 
     }
+
+    if (currentView == "setOpponentName") {
+
+        app.innerHTML = /* html */`
+            <h1>Set opponent name</h1>
+            <div>
+                <input type="text" id="opponent-name-input" onchange="model.fields.gameName = this.value">
+                <p><button onclick="setOpponentName()">Continue</button></p>
+            </div>
+        `;
+        return;
+        
+    }
     
     if (currentView == "waitingForPlayer") {
 

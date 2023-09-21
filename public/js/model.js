@@ -4,6 +4,9 @@ const model = {
     app: {
         currentView: "main-menu"
     },
+    fields: {
+        gameName: null
+    },
     icons: {
         pawn: "♟",
         bishop: "♝",
