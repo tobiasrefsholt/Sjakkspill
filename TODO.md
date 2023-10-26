@@ -28,7 +28,7 @@ Ideer til å forbedre spillet
 
 ## Andre funksjoner
 - [x] Lagre gameId og playerId som en cookie eller lignende. Dette er for å kunne regenerere modellen hvis vinduet blir lastet på nytt.
-- [ ] Markere siste trekk fra motstander i en annen farge
+- [x] Markere siste trekk fra motstander i en annen farge
 - [ ] Logg over utførte trekk
 - [ ] Bedre mobiltilpasning
 - [ ] Klokke
