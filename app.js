@@ -1,7 +1,5 @@
-const http = require('http');
 const express = require('express');
 const app = express();
-const serverRoot = __dirname;
 
 require('dotenv').config()
 
