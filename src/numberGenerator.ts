@@ -1,4 +1,4 @@
-const crypto = require("crypto");
+import crypto from 'crypto';
 
 function generatePin() {
     let min = 100000;
@@ -11,4 +11,4 @@ function generateId() {
     return crypto.randomBytes(32).toString('hex');
 }
 
-module.exports = { generatePin, generateId };
+export = { generatePin, generateId };

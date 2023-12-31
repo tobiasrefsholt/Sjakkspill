@@ -1,4 +1,4 @@
-const database = require('./database');
+import database from './database';
 
 async function getState(request) {
 

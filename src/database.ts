@@ -1,4 +1,4 @@
-const pool = require('./databaseConnection.js')
+import pool from './databaseConnection';
 
 async function newGameEntry(gameId, joinPin, firstPlayerId) {
     const sql = `
@@ -138,7 +138,7 @@ async function checkGameReady(gameId) {
     return (results[0][0]?.black_player_id !== null);
 }
 
-module.exports = {
+export = {
     newGameEntry,
     newPlayerEntry,
     addBlackPlayerToGamestate,

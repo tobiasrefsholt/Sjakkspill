@@ -1,5 +1,5 @@
-const database = require('./database');
-const numberGen = require('./numberGenerator');
+import database from './database';
+import numberGen from './numberGenerator';
 
 async function joinNewGame(request) {
 

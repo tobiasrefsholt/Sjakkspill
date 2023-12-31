@@ -1,4 +1,4 @@
-const database = require('./database');
+import database from './database';
 
 let piecesState;
 let turn;
@@ -350,4 +350,4 @@ function getPieceIndexByPosition(position, piecesState) {
 
 }
 
-module.exports = {currentLegalMoves, getPieceIndexByPosition};
+export = {currentLegalMoves, getPieceIndexByPosition};

@@ -1,5 +1,5 @@
-const database = require('./database');
-const getMoves = require('./getMoves');
+import database from './database';
+import getMoves from './getMoves';
 
 async function movePiece(request) {
 

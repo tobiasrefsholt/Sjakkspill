@@ -1,5 +1,5 @@
-const database = require('./database');
-const numberGen = require('./numberGenerator');
+import database from './database';
+import numberGen from './numberGenerator';
 
 function createNewGame() {
 
@@ -123,9 +123,12 @@ function getInitialPiecesState() {
 
 }
 
+class piece {
+}
+
 function getInitialPawnPositions(color) {
 
-    const pawns = [];
+    const pawns : piece[] = [];
     let targetRow;
 
     if (color === "white") {
@@ -147,4 +150,4 @@ function getInitialPawnPositions(color) {
     return pawns;
 }
 
-module.exports = {createNewGame};
+export = {createNewGame};
