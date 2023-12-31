@@ -5,7 +5,6 @@ require('dotenv').config()
 
 app.use(express.static('public'));
 app.use(express.json());
-//app.use(express.urlencoded());
 
 app.get('/', (req, res) => {
     res.sendFile('./public/index.html')
