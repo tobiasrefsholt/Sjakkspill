@@ -7,30 +7,23 @@ async function currentLegalMoves(request) {
 
     if (!request.gameId) return {"error": "GameId not defined"};
     if (!request.selectedPieceIndex && request.selectedPieceIndex !== 0) return {"error": "selectedPieceIndex not defined"};
-    
-    let selectedPieceIndex = parseInt(request.selectedPieceIndex);
-    let state = await database.getCurrentState(request.gameId); /* Returns {piecesState, turn} if gameId exists, else false */
-    
+
+    const selectedPieceIndex = parseInt(request.selectedPieceIndex);
+    const state = await database.getCurrentState(request.gameId); /* Returns {piecesState, turn} if gameId exists, else false */
+
     piecesState = JSON.parse(state.pieces_state);
     turn = state.turn;
 
     if (!state) return {"error": "GameId not found in database"};
-
-    console.log("selectedPieceIndex: " + selectedPieceIndex);
-
-    let legalMoves = calculateLegalMoves(selectedPieceIndex); /* Returns array of coordinate objects */
-
-    if (legalMoves.error) return legalMoves;
-
-    console.log("legalmoves: " + JSON.stringify(legalMoves))
-
-    return legalMoves;
+    
+     /* Returns array of coordinate objects */
+    return calculateLegalMoves(selectedPieceIndex);
 
 }
 
 function calculateLegalMoves(selectedPieceIndex) {
-   
-    let selectedPiece = piecesState[selectedPieceIndex];
+
+    const selectedPiece = piecesState[selectedPieceIndex];
     let moves;
     let legalMoves = [];
 
@@ -58,7 +51,7 @@ function calculateLegalMoves(selectedPieceIndex) {
     }
 
     // Remove fields outside board
-    for (let i=0; i<moves.length; i++) {
+    for (let i = 0; i < moves.length; i++) {
         if ((moves[i].x <= 8) && (moves[i].x >= 1) && (moves[i].y <= 8) && (moves[i].y >= 1)) {
             legalMoves.push(moves[i]);
         }
@@ -72,11 +65,11 @@ function calculateLegalMovesPawn(currentPawn) {
 
     let legalMoves = [];
     // Definer hvilke regler som gjelder
-    let currentRange = currentPawn.firstMove ? [1,2] : [1];
+    let currentRange = currentPawn.firstMove ? [1, 2] : [1];
 
     // Definer offsetModifier som 1 eller -1, avhengig av fargen på brikken. Brukes for å snu om på lovlige trekk for svarte brikker.
     let offsetModifier;
-    if (currentPawn.color == "white") {
+    if (currentPawn.color === "white") {
         offsetModifier = 1;
     } else {
         offsetModifier = -1;
@@ -84,18 +77,18 @@ function calculateLegalMovesPawn(currentPawn) {
 
     // Sjekk om bonden har noen å angripe (diagonalt)
     let attackRange = [
-        {x: currentPawn.position.x + 1 * offsetModifier, y: currentPawn.position.y + 1 * offsetModifier },
-        {x: currentPawn.position.x + -1 * offsetModifier, y: currentPawn.position.y + 1 * offsetModifier }
+        {x: currentPawn.position.x + offsetModifier, y: currentPawn.position.y + offsetModifier},
+        {x: currentPawn.position.x + -1 * offsetModifier, y: currentPawn.position.y + offsetModifier}
     ]
-    if ( currentPieceCanAttack(currentPawn, attackRange[0]) ) {
+    if (currentPieceCanAttack(currentPawn, attackRange[0])) {
         legalMoves.push(attackRange[0])
     }
-    if ( currentPieceCanAttack(currentPawn, attackRange[1]) ) {
+    if (currentPieceCanAttack(currentPawn, attackRange[1])) {
         legalMoves.push(attackRange[1])
     }
 
     // Kalkuler lovlige felter etter reglene
-    for (let i=0; i<currentRange.length; i++) {
+    for (let i = 0; i < currentRange.length; i++) {
         let targetCell = {
             x: currentPawn.position.x,
             y: currentPawn.position.y + currentRange[i] * offsetModifier
@@ -106,14 +99,12 @@ function calculateLegalMovesPawn(currentPawn) {
     }
 
     return legalMoves;
-    
+
 }
 
 function calculateLegalMovesBishop(currentBishop) {
 
-    let legalMoves = calculateFieldsDiagonals(currentBishop);
-
-    return legalMoves;
+    return calculateFieldsDiagonals(currentBishop);
 
 }
 
@@ -121,19 +112,19 @@ function calculateLegalMovesKnight(currentKnight) {
 
     let legalMoves = [];
     let possibleMoves = [
-        { x: currentKnight.position.x + 2, y: currentKnight.position.y + 1 },
-        { x: currentKnight.position.x + 1, y: currentKnight.position.y + 2 },
-        { x: currentKnight.position.x - 1, y: currentKnight.position.y + 2 },
-        { x: currentKnight.position.x - 2, y: currentKnight.position.y + 1 },
-        { x: currentKnight.position.x - 2, y: currentKnight.position.y - 1 },
-        { x: currentKnight.position.x - 1, y: currentKnight.position.y - 2 },
-        { x: currentKnight.position.x + 1, y: currentKnight.position.y - 2 },
-        { x: currentKnight.position.x + 2, y: currentKnight.position.y - 1 },
+        {x: currentKnight.position.x + 2, y: currentKnight.position.y + 1},
+        {x: currentKnight.position.x + 1, y: currentKnight.position.y + 2},
+        {x: currentKnight.position.x - 1, y: currentKnight.position.y + 2},
+        {x: currentKnight.position.x - 2, y: currentKnight.position.y + 1},
+        {x: currentKnight.position.x - 2, y: currentKnight.position.y - 1},
+        {x: currentKnight.position.x - 1, y: currentKnight.position.y - 2},
+        {x: currentKnight.position.x + 1, y: currentKnight.position.y - 2},
+        {x: currentKnight.position.x + 2, y: currentKnight.position.y - 1},
     ];
 
-    for (let i=0; i<possibleMoves.length; i++) {
+    for (let i = 0; i < possibleMoves.length; i++) {
 
-        if (fieldIsOccupied(possibleMoves[i]) != currentKnight.color) {
+        if (fieldIsOccupied(possibleMoves[i]) !== currentKnight.color) {
             legalMoves.push(possibleMoves[i]);
         }
 
@@ -146,9 +137,7 @@ function calculateLegalMovesRook(currentRook) {
 
     let northSouth = calculateFieldsNorthSouth(currentRook);
     let eastWest = calculateFieldsEastWest(currentRook);
-    let legalMoves = northSouth.concat(eastWest);
-
-    return legalMoves;
+    return northSouth.concat(eastWest);
 
 }
 
@@ -157,35 +146,33 @@ function calculateLegalMovesQueen(currentQueen) {
     let northSouth = calculateFieldsNorthSouth(currentQueen);
     let eastWest = calculateFieldsEastWest(currentQueen);
     let diagonals = calculateFieldsDiagonals(currentQueen);
-    let legalMoves = northSouth.concat(eastWest, diagonals);
-
-    return legalMoves;
+    return northSouth.concat(eastWest, diagonals);
 }
 
 function calculateLegalMovesKing(currentKing) {
 
     let legalMoves = [];
     let possibleMoves = [
-        { x: currentKing.position.x, y: currentKing.position.y + 1 },
-        { x: currentKing.position.x + 1, y: currentKing.position.y + 1 },
-        { x: currentKing.position.x + 1, y: currentKing.position.y},
-        { x: currentKing.position.x + 1, y: currentKing.position.y - 1 },
-        { x: currentKing.position.x, y: currentKing.position.y - 1},
-        { x: currentKing.position.x - 1, y: currentKing.position.y - 1 },
-        { x: currentKing.position.x - 1, y: currentKing.position.y },
-        { x: currentKing.position.x - 1, y: currentKing.position.y + 1 },
+        {x: currentKing.position.x, y: currentKing.position.y + 1},
+        {x: currentKing.position.x + 1, y: currentKing.position.y + 1},
+        {x: currentKing.position.x + 1, y: currentKing.position.y},
+        {x: currentKing.position.x + 1, y: currentKing.position.y - 1},
+        {x: currentKing.position.x, y: currentKing.position.y - 1},
+        {x: currentKing.position.x - 1, y: currentKing.position.y - 1},
+        {x: currentKing.position.x - 1, y: currentKing.position.y},
+        {x: currentKing.position.x - 1, y: currentKing.position.y + 1},
     ];
 
-    for (let i=0; i<possibleMoves.length; i++) {
+    for (let i = 0; i < possibleMoves.length; i++) {
 
-        if (fieldIsOccupied(possibleMoves[i]) != currentKing.color) {
+        if (fieldIsOccupied(possibleMoves[i]) !== currentKing.color) {
             legalMoves.push(possibleMoves[i]);
         }
 
     }
 
     return legalMoves;
-    
+
 }
 
 function calculateFieldsDiagonals(piece) {
@@ -193,11 +180,11 @@ function calculateFieldsDiagonals(piece) {
     let legalMoves = [];
 
     // North-east
-    for (let i=1; i<=7; i++) {    
+    for (let i = 1; i <= 7; i++) {
         let targetCell = {};
         targetCell.x = piece.position.x + i;
         targetCell.y = piece.position.y + i;
-        if (fieldIsOccupied(targetCell) == piece.color) {
+        if (fieldIsOccupied(targetCell) === piece.color) {
             break;
         }
         legalMoves.push(targetCell);
@@ -207,11 +194,11 @@ function calculateFieldsDiagonals(piece) {
     }
 
     // South-east
-    for (let i=1; i<=7; i++) {
+    for (let i = 1; i <= 7; i++) {
         let targetCell = {};
         targetCell.x = piece.position.x + i;
         targetCell.y = piece.position.y - i;
-        if (fieldIsOccupied(targetCell) == piece.color) {
+        if (fieldIsOccupied(targetCell) === piece.color) {
             break;
         }
         legalMoves.push(targetCell);
@@ -221,11 +208,11 @@ function calculateFieldsDiagonals(piece) {
     }
 
     // South-west
-    for (let i=1; i<=7; i++) {
+    for (let i = 1; i <= 7; i++) {
         let targetCell = {};
         targetCell.x = piece.position.x - i;
         targetCell.y = piece.position.y - i;
-        if (fieldIsOccupied(targetCell) == piece.color) {
+        if (fieldIsOccupied(targetCell) === piece.color) {
             break;
         }
         legalMoves.push(targetCell);
@@ -235,11 +222,11 @@ function calculateFieldsDiagonals(piece) {
     }
 
     // North-west
-    for (let i=1; i<=7; i++) {
+    for (let i = 1; i <= 7; i++) {
         let targetCell = {};
         targetCell.x = piece.position.x - i;
         targetCell.y = piece.position.y + i;
-        if (fieldIsOccupied(targetCell) == piece.color) {
+        if (fieldIsOccupied(targetCell) === piece.color) {
             break;
         }
         legalMoves.push(targetCell);
@@ -257,11 +244,11 @@ function calculateFieldsNorthSouth(piece) {
     let legalMoves = [];
 
     // North
-    for (let i=1; i<=7; i++) {
+    for (let i = 1; i <= 7; i++) {
         let targetCell = {};
         targetCell.x = piece.position.x;
         targetCell.y = piece.position.y + i;
-        if (fieldIsOccupied(targetCell) == piece.color) {
+        if (fieldIsOccupied(targetCell) === piece.color) {
             break;
         }
         legalMoves.push(targetCell);
@@ -271,11 +258,11 @@ function calculateFieldsNorthSouth(piece) {
     }
 
     // South
-    for (let i=1; i<=7; i++) {
+    for (let i = 1; i <= 7; i++) {
         let targetCell = {};
         targetCell.x = piece.position.x;
         targetCell.y = piece.position.y - i;
-        if (fieldIsOccupied(targetCell) == piece.color) {
+        if (fieldIsOccupied(targetCell) === piece.color) {
             break;
         }
         legalMoves.push(targetCell);
@@ -293,11 +280,11 @@ function calculateFieldsEastWest(piece) {
     let legalMoves = [];
 
     // East
-    for (let i=1; i<=7; i++) {
+    for (let i = 1; i <= 7; i++) {
         let targetCell = {};
         targetCell.x = piece.position.x + i;
         targetCell.y = piece.position.y;
-        if (fieldIsOccupied(targetCell) == piece.color) {
+        if (fieldIsOccupied(targetCell) === piece.color) {
             break;
         }
         legalMoves.push(targetCell);
@@ -307,11 +294,11 @@ function calculateFieldsEastWest(piece) {
     }
 
     // West
-    for (let i=1; i<=7; i++) {
+    for (let i = 1; i <= 7; i++) {
         let targetCell = {};
         targetCell.x = piece.position.x - i;
         targetCell.y = piece.position.y;
-        if (fieldIsOccupied(targetCell) == piece.color) {
+        if (fieldIsOccupied(targetCell) === piece.color) {
             break;
         }
         legalMoves.push(targetCell);
@@ -329,7 +316,7 @@ function calculateFieldsEastWest(piece) {
 function fieldIsOccupied(targetCell) {
 
     let targetPiece = getPieceIndexByPosition(targetCell, piecesState);
-    
+
     if (!targetPiece && targetPiece !== 0) {
         return false;
     }
@@ -346,18 +333,14 @@ function currentPieceCanAttack(selectedPiece, target) {
 
     let targetPiece = piecesState[getPieceIndexByPosition(target, piecesState)];
 
-    if (targetPiece.color == selectedPiece.color) {
-        return false;
-    }
-
-    return true;
+    return targetPiece.color !== selectedPiece.color;
 }
 
 function getPieceIndexByPosition(position, piecesState) {
 
     for (let i = 0; i < piecesState.length; i++) {
-        
-        if (!piecesState[i].disabled && JSON.stringify(piecesState[i].position) == JSON.stringify(position)) {
+
+        if (!piecesState[i].disabled && JSON.stringify(piecesState[i].position) === JSON.stringify(position)) {
             return i;
         }
 
@@ -367,4 +350,4 @@ function getPieceIndexByPosition(position, piecesState) {
 
 }
 
-module.exports = { currentLegalMoves, getPieceIndexByPosition };
+module.exports = {currentLegalMoves, getPieceIndexByPosition};
