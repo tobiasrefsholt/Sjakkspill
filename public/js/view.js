@@ -8,7 +8,7 @@ function updateView() {
 
     const app = document.getElementById('app');
 
-    if (currentView == "activeGame") {
+    if (currentView === "activeGame") {
 
         app.innerHTML = activeGameHTML();
         updatePiecesView();
@@ -17,7 +17,7 @@ function updateView() {
 
     }
 
-    if (currentView == "setOpponentName") {
+    if (currentView === "setOpponentName") {
 
         app.innerHTML = /* html */`
             <h1>Set opponent name</h1>
@@ -30,7 +30,7 @@ function updateView() {
         
     }
     
-    if (currentView == "waitingForPlayer") {
+    if (currentView === "waitingForPlayer") {
 
         app.innerHTML = waitingForPlayerHTML();
         return;
@@ -58,7 +58,7 @@ function activeGameHTML() {
 
     let flipBoardClass = '';
 
-    if (model.gameState.playerColor == "black") {
+    if (model.gameState.playerColor === "black") {
         flipBoardClass = " flip-board";
     }
 
@@ -168,7 +168,7 @@ function boardViewHTML() {
     boardHtml += /*html*/`<div id="chess-board">`;
 
     for (let rowCount = 8; rowCount >= 1; rowCount--) {
-        let parity = (rowCount%2 == 0) ? 'even' : 'odd';
+        let parity = (rowCount%2 === 0) ? 'even' : 'odd';
         boardHtml += boardRowView(parity, rowCount);
     }
 
@@ -183,15 +183,15 @@ function boardRowView(rowParity, rowCount) {
     let html = '';
     let CellParityOffest = 0;
 
-    if (rowParity == 'odd') {
+    if (rowParity === 'odd') {
         CellParityOffest = 1;
     }
 
     for (let colCount = 1; colCount <= 8; colCount++) {
-        let cellColor = ( (colCount+CellParityOffest) % 2 == 0 ) ? 'black' : 'white';
+        let cellColor = ( (colCount+CellParityOffest) % 2 === 0 ) ? 'black' : 'white';
 
         // Sjekk om denne cellen er et lovlig trekk. Hvis den er det, legg til cell-legal-move klassen.
-        if (model.piecesState.currentLegalMoves && model.piecesState.currentLegalMoves.some(position => position.x == colCount && position.y == rowCount)) {
+        if (model.piecesState.currentLegalMoves && model.piecesState.currentLegalMoves.some(position => position.x === colCount && position.y === rowCount)) {
             html += /*html*/`
                 <div class="cell cell-legal-move" row="${rowCount}" col="${colCount}"></div>
             `;
@@ -200,9 +200,9 @@ function boardRowView(rowParity, rowCount) {
         
         // Sjekk om forrige trekk fra motstanderen ble gjort fra/til denne cellen og gi den en egen bakgrunnsfarge.
         if ( 
-            (model.gameState.playerColor != model.gameState.lastMove.color) 
-            && ( (model.gameState.lastMove.from.x == colCount && model.gameState.lastMove.from.y == rowCount)
-                || (model.gameState.lastMove.to.x == colCount && model.gameState.lastMove.to.y == rowCount)
+            (model.gameState.playerColor !== model.gameState.lastMove.color) 
+            && ( (model.gameState.lastMove.from.x === colCount && model.gameState.lastMove.from.y === rowCount)
+                || (model.gameState.lastMove.to.x === colCount && model.gameState.lastMove.to.y === rowCount)
             )
         ) {
 

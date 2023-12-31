@@ -17,7 +17,7 @@ async function getState(request) {
 
     // Return gameready: true | false if checkGameReady is set in the request
     if (request.checkGameReady) {
-        let gameReady = await database.checkGameReady(request.gameId);
+        const gameReady = await database.checkGameReady(request.gameId);
         return {gameReady};
     }
 
@@ -34,7 +34,7 @@ async function getGameStateObject(request) {
     if (!stateHasChanged) return {hasChanged: false};
 
     // Get state from database if client is out of sync
-    let state = await database.getCurrentState(request.gameId); // Returns object: {piecesState (JSON), turn}
+    const state = await database.getCurrentState(request.gameId); // Returns object: {piecesState (JSON), turn}
 
     return {
         hasChanged: true,

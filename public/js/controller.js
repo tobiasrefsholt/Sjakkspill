@@ -1,6 +1,6 @@
 "use strict";
 
-let serverPullInterval = setInterval( () => {
+setInterval( () => {
     
     if (!model.gameState.gameId) return;
 
@@ -10,7 +10,7 @@ let serverPullInterval = setInterval( () => {
         return;
     } 
     
-    if (model.gameState.gameReady && model.gameState.turn == model.gameState.playerColor && model.app.currentView == "activeGame") {
+    if (model.gameState.gameReady && model.gameState.turn === model.gameState.playerColor && model.app.currentView === "activeGame") {
         /* console.log("Waiting for player to move"); */
         return;
     }
@@ -18,7 +18,7 @@ let serverPullInterval = setInterval( () => {
     if (model.gameState.gameReady) {
         /* console.log("Pulling server: Game is ready, syncing."); */
         getState(false);
-        if (model.app.currentView != "activeGame" && model.app.currentView != "setOpponentName") {
+        if (model.app.currentView !== "activeGame" && model.app.currentView !== "setOpponentName") {
             model.app.currentView = "activeGame";
             updateView();
         }
@@ -136,7 +136,7 @@ async function getState(checkGameReady) {
         model.gameState.lastChange = data.lastChange;
         model.piecesState.pieces = JSON.parse(data.piecesState);
         if (data.lastMove) model.gameState.lastMove = JSON.parse(data.lastMove);
-        if (model.app.currentView == "activeGame") {
+        if (model.app.currentView === "activeGame") {
             updateView();
         }
     });
@@ -216,7 +216,7 @@ function getDisabledPiecesIndex(color) {
 
     for (let i = 0; i < model.piecesState.pieces.length; i++) {
         
-        if (model.piecesState.pieces[i].disabled && model.piecesState.pieces[i].color == color) {
+        if (model.piecesState.pieces[i].disabled && model.piecesState.pieces[i].color === color) {
             disabledPieces.push(i);
         }
 
@@ -254,7 +254,7 @@ function removeFromLocalStorage(gameIdToRemove, playerId) {
 
     for (let i=0; i < savedRounds.length; i++) {
         let round = savedRounds[i];
-        if (round.gameId == gameIdToRemove && round.playerId == playerId) {
+        if (round.gameId === gameIdToRemove && round.playerId === playerId) {
             roundIndexToRemove = i;
             break;
         }
@@ -281,7 +281,7 @@ function addEventListenersOnPieces() {
 
     document.querySelectorAll('.cell:not(.cell-legal-move)').forEach(cell => {
 
-        cell.addEventListener("mousedown", function (event) {
+        cell.addEventListener("mousedown", () => {
             let index = parseInt(this.getAttribute("piece-index"));
             selectPiece(index);
             // If empty cell, reset variables and update view
@@ -291,7 +291,7 @@ function addEventListenersOnPieces() {
 
     document.querySelectorAll('.cell-legal-move').forEach(cell => {
 
-        cell.addEventListener("mouseup", function (event) {
+        cell.addEventListener("mouseup", () => {
             let targetPosition = {x: parseInt(this.getAttribute("col")), y: parseInt(this.getAttribute("row"))};
             moveToCell(targetPosition);
         });
