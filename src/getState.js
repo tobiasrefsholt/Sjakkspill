@@ -28,7 +28,7 @@ async function getState(request) {
 async function getGameStateObject(request) {
     // Check if client is up to date with database
     const latestServerTimestamp = await database.getLatestStateTimestamp(request.gameId);
-    const stateHasChanged = request.lastChange > latestServerTimestamp || request.lastChange === null;
+    const stateHasChanged = request.lastChange < latestServerTimestamp || !request.lastChange;
 
     // Early return if client is up to date
     if (!stateHasChanged) return {hasChanged: false};

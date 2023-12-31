@@ -9,8 +9,8 @@ async function movePiece(request) {
 
     // Get state from database
     const {gameId, playerId, selectedPieceIndex, targetPosition} = request;
-    let {pieces_state: piecesStateAsJSON, turn} = await database.getCurrentState(gameId);
-    let piecesState = JSON.parse(piecesStateAsJSON);
+    const {pieces_state: piecesStateAsJSON, turn} = await database.getCurrentState(gameId);
+    const piecesState = JSON.parse(piecesStateAsJSON);
     const selectedPiece = piecesState[selectedPieceIndex];
 
     // Return error of user cannot move
@@ -32,9 +32,9 @@ function requestHasError(request) {
 
 async function doMove(gameId, turn, piecesState, selectedPiece, targetPosition) {
     // If there is a piece at the target field, disable it.
-    let targetPositionIndex = getMoves.getPieceIndexByPosition(targetPosition, piecesState);
-    if (targetPositionIndex) {
-        piecesState[targetPositionIndex].disabled = true;
+    const targetPiece = piecesState[getMoves.getPieceIndexByPosition(targetPosition, piecesState)];
+    if (targetPiece) {
+        targetPiece.disabled = true;
     }
 
     // Change coordinates of the selected piece

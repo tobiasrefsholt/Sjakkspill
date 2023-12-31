@@ -72,9 +72,7 @@ async function getGameIdByPin(pin) {
     `;
 
     const results = await pool.promise().execute(sql, [pin]);
-
-    if (results[0].length === 0) return false;
-    return results[0][0].game_id;
+    return results[0][0]?.game_id ?? null;
 }
 
 async function removeJoinPin(gameId) {
@@ -84,7 +82,7 @@ async function removeJoinPin(gameId) {
     const sql = `
         UPDATE gamestate
         SET join_pin = NULL
-        WHERE game_id = '${gameId}'
+        WHERE game_id = ?
     `;
 
     await pool.promise().execute(sql, [gameId]);
@@ -99,9 +97,7 @@ async function getLatestStateTimestamp(gameId) {
     `;
 
     const results = await pool.promise().execute(sql, [gameId]);
-
-    if (results[0][0].length === 0) return false;
-    return results[0][0].latest_update;
+    return results[0][0]?.latest_update ?? null;
 }
 
 async function getCurrentState(gameId) {
@@ -109,13 +105,11 @@ async function getCurrentState(gameId) {
     const sql = `
         SELECT pieces_state, turn, last_move
         FROM gamestate
-        WHERE game_id = '${gameId}'
+        WHERE game_id = ?
     `;
 
-    const results = await pool.promise().query(sql);
-
-    if (results[0][0].length === 0) return false;
-    return results[0][0];
+    const results = await pool.promise().execute(sql, [gameId]);
+    return results[0][0] ?? null;
 }
 
 async function updateState(gameId, state) {
@@ -141,9 +135,7 @@ async function checkGameReady(gameId) {
     `;
 
     const results = await pool.promise().execute(sql, [gameId]);
-
-    if (!results[0][0].hasOwnProperty("black_player_id")) return false;
-    return (results[0][0].black_player_id !== null);
+    return (results[0][0]?.black_player_id !== null);
 }
 
 module.exports = {
