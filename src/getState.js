@@ -11,29 +11,30 @@ async function getState(request) {
         }
     */
 
-    if (!request.gameId) return { error: "Ingen gameId definert, eller ugyldig format" };
-    if (!request.playerId) return { error: "Ingen playerId definert, eller ugyldig format" };
+    // Validate request
+    if (!request.gameId) return {error: "Ingen gameId definert, eller ugyldig format"};
+    if (!request.playerId) return {error: "Ingen playerId definert, eller ugyldig format"};
 
+    // Return gameready: true | false if checkGameReady is set in the request
     if (request.checkGameReady) {
         let gameReady = await database.checkGameReady(request.gameId);
-        return { gameReady };
+        return {gameReady};
     }
 
-    // Set default til true, sånn at man forcer en update om man ikke sender med lastChange fra klienten.
-    let stateHasChanged = true;
+    return await getGameStateObject(request);
 
-    // Hvis request inneholder siste oppdateringstid, sjekk om den er eldre enn versjonen i databasen.
-    // Hvis ikke, retuner false til clienten, ellers forstetter koden.
+}
+
+async function getGameStateObject(request) {
+    // Check if client is up to date with database
     const latestServerTimestamp = await database.getLatestStateTimestamp(request.gameId);
-    //console.log("latestServerTimestamp: " + latestServerTimestamp);
+    const stateHasChanged = request.lastChange > latestServerTimestamp || request.lastChange === null;
 
-    if (latestServerTimestamp <= request.lastChange) {
-        stateHasChanged = false;
-    }
+    // Early return if client is up to date
+    if (!stateHasChanged) return {hasChanged: false};
 
-    if (!stateHasChanged) return { hasChanged: false };
-
-    let state = await database.getCurrentState(request.gameId); // Returnerer objekt {piecesState (JSON), turn}
+    // Get state from database if client is out of sync
+    let state = await database.getCurrentState(request.gameId); // Returns object: {piecesState (JSON), turn}
 
     return {
         hasChanged: true,
@@ -42,7 +43,6 @@ async function getState(request) {
         lastMove: state.last_move,
         piecesState: state.pieces_state
     };
-
 }
 
-module.exports = { getState };
+module.exports = {getState};
