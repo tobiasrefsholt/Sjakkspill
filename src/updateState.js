@@ -25,7 +25,7 @@ async function movePiece(request) {
 function requestHasError(request) {
     if (!request.gameId) return "Ingen gameId definert, eller ugyldig format";
     if (!request.playerId) return "Ingen playerId definert, eller ugyldig format";
-    if (!request.selectedPieceIndex) return "selectedPieceIndex er ikke definert";
+    if (!Number.isInteger(request.selectedPieceIndex)) return "selectedPieceIndex er ikke definert";
     if (!request.targetPosition) return "targetPosition er ikke definert";
     return null;
 }
