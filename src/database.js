@@ -6,14 +6,14 @@ async function newGameEntry(gameId, joinPin, firstPlayerId) {
         VALUES (?, ?, ?)
     `;
 
-    pool.getConnection(async (err, connection) => {
+    await pool.getConnection(async (err, connection) => {
         await connection.execute(sql, [gameId, joinPin, firstPlayerId]);
         console.log(`New game (game_id = ${gameId}) added to 'gamestate' table`);
         pool.releaseConnection(connection);
     });
 }
 
-function newPlayerEntry(playerId, gameId, color) {
+async function newPlayerEntry(playerId, gameId, color) {
 
     if (!playerId && !gameId) return;
 
@@ -22,13 +22,13 @@ function newPlayerEntry(playerId, gameId, color) {
         VALUES (?, ?, ?)
     `;
 
-    pool.execute(sql, [playerId, gameId, color], (err) => {
+    await pool.promise().execute(sql, [playerId, gameId, color], (err) => {
         if (err) throw err;
         console.log(`New player (playerId = ${playerId}) added to 'players' table`);
     });
 }
 
-function addBlackPlayerToGamestate(playerId, gameId) {
+async function addBlackPlayerToGamestate(playerId, gameId) {
 
     if (!playerId && !gameId) return;
 
@@ -38,7 +38,7 @@ function addBlackPlayerToGamestate(playerId, gameId) {
         WHERE game_id = ?
     `;
 
-    pool.execute(sql, [playerId, gameId], function (err, result) {
+    await pool.promise().execute(sql, [playerId, gameId], function (err, result) {
         if (err) throw err;
 
         gameId = result.id;
@@ -58,9 +58,7 @@ async function getPlayerColor(playerId, gameId) {
     `;
 
     const results = await pool.promise().execute(sql, [playerId, gameId]);
-
     return results[0][0]?.color;
-
 }
 
 async function getGameIdByPin(pin) {
@@ -76,9 +74,7 @@ async function getGameIdByPin(pin) {
     const results = await pool.promise().execute(sql, [pin]);
 
     if (results[0].length === 0) return false;
-
     return results[0][0].game_id;
-
 }
 
 async function removeJoinPin(gameId) {
@@ -91,8 +87,7 @@ async function removeJoinPin(gameId) {
         WHERE game_id = '${gameId}'
     `;
 
-    pool.execute(sql, [gameId]);
-
+    await pool.promise().execute(sql, [gameId]);
 }
 
 async function getLatestStateTimestamp(gameId) {
@@ -106,9 +101,7 @@ async function getLatestStateTimestamp(gameId) {
     const results = await pool.promise().execute(sql, [gameId]);
 
     if (results[0][0].length === 0) return false;
-
     return results[0][0].latest_update;
-
 }
 
 async function getCurrentState(gameId) {
@@ -122,9 +115,7 @@ async function getCurrentState(gameId) {
     const results = await pool.promise().query(sql);
 
     if (results[0][0].length === 0) return false;
-
     return results[0][0];
-
 }
 
 async function updateState(gameId, state) {
@@ -137,11 +128,8 @@ async function updateState(gameId, state) {
             last_move     = ?
         WHERE game_id = ?
     `;
-    
-    const params = [state.piecesState, state.turn, state.timestamp, state.lastMove ?? null, gameId];
-    console.log(params);
 
-    await pool.promise().execute(sql, params);
+    await pool.promise().execute(sql, [state.piecesState, state.turn, state.timestamp, state.lastMove ?? null, gameId]);
 }
 
 async function checkGameReady(gameId) {
