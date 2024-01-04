@@ -1,15 +1,21 @@
 import database from './database';
 
-async function getState(request) {
+type getStateRequest = {
+    gameId: string,
+    playerId: string,
+    lastChange: number,
+    checkGameReady: boolean
+}
 
-    /* 
-        request = {
-            gameId,
-            playerId,
-            lastChange // Timestamp på siste sync
-            checkGameReady: true | false
-        }
-    */
+type response = {
+    hasChanged: boolean,
+    turn: "white" | "black",
+    lastChange: number,
+    lastMove: any,
+    piecesState: any
+}
+
+async function getState(request: getStateRequest) {
 
     // Validate request
     if (!request.gameId) return {error: "Ingen gameId definert, eller ugyldig format"};
@@ -21,11 +27,11 @@ async function getState(request) {
         return {gameReady};
     }
 
-    return await getGameStateObject(request);
+    return getGameStateObject(request);
 
 }
 
-async function getGameStateObject(request) {
+async function getGameStateObject(request: getStateRequest) : Promise<response | { hasChanged: boolean }> {
     // Check if client is up to date with database
     const latestServerTimestamp = await database.getLatestStateTimestamp(request.gameId);
     const stateHasChanged = request.lastChange < latestServerTimestamp || !request.lastChange;

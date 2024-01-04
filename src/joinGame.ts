@@ -1,12 +1,21 @@
 import database from './database';
 import numberGen from './numberGenerator';
+import {createSecretKey} from "crypto";
 
-async function joinNewGame(request) {
+type request = {
+    joinPin: string
+}
+
+type response = {
+    gameId: string,
+    playerId: string,
+    playerColor: "white" | "black"
+}
+
+async function joinNewGame(request: request): Promise<response | { error: string }> {
 
     // Returner en feilmelding hvis joinPin ikke er en INT
     if (!Number.isInteger(parseInt(request.joinPin))) return {error: "joinPin har et ugyldig format"};
-
-    request.joinPin = parseInt(request.joinPin);
 
     // Søk opp joinPin i databasen og retuner gameId
     const gameId = await database.getGameIdByPin(request.joinPin);
@@ -30,4 +39,4 @@ async function joinNewGame(request) {
 
 }
 
-module.exports = { joinNewGame };
+module.exports = {joinNewGame};

@@ -1,31 +1,36 @@
 import database from './database';
+import {piece, coordinate} from "./types";
 
-let piecesState;
-let turn;
+type legalMoveRequest = {
+    gameId: string;
+    selectedPieceIndex: number;
+}
 
-async function currentLegalMoves(request) {
+let piecesState: piece[];
+let turn: string;
+
+async function currentLegalMoves(request: legalMoveRequest): Promise<coordinate[] | { error: string }> {
 
     if (!request.gameId) return {"error": "GameId not defined"};
     if (!request.selectedPieceIndex && request.selectedPieceIndex !== 0) return {"error": "selectedPieceIndex not defined"};
 
-    const selectedPieceIndex = parseInt(request.selectedPieceIndex);
     const state = await database.getCurrentState(request.gameId); /* Returns {piecesState, turn} if gameId exists, else false */
 
     piecesState = JSON.parse(state.pieces_state);
     turn = state.turn;
 
     if (!state) return {"error": "GameId not found in database"};
-    
-     /* Returns array of coordinate objects */
-    return calculateLegalMoves(selectedPieceIndex);
+
+    /* Returns array of coordinate objects */
+    return calculateLegalMoves(request.selectedPieceIndex);
 
 }
 
-function calculateLegalMoves(selectedPieceIndex) {
+function calculateLegalMoves(selectedPieceIndex: number): coordinate[] | { error: string } {
 
     const selectedPiece = piecesState[selectedPieceIndex];
-    let moves;
-    let legalMoves = [];
+    let moves: coordinate[];
+    let legalMoves: coordinate[] = [];
 
     switch (selectedPiece.type) {
         case "pawn":
@@ -61,22 +66,17 @@ function calculateLegalMoves(selectedPieceIndex) {
 
 }
 
-function calculateLegalMovesPawn(currentPawn) {
+function calculateLegalMovesPawn(currentPawn: piece): coordinate[] {
 
-    let legalMoves = [];
+    let legalMoves: coordinate[] = [];
     // Definer hvilke regler som gjelder
     let currentRange = currentPawn.firstMove ? [1, 2] : [1];
 
     // Definer offsetModifier som 1 eller -1, avhengig av fargen på brikken. Brukes for å snu om på lovlige trekk for svarte brikker.
-    let offsetModifier;
-    if (currentPawn.color === "white") {
-        offsetModifier = 1;
-    } else {
-        offsetModifier = -1;
-    }
+    const offsetModifier = (currentPawn.color === "white") ? 1 : -1;
 
     // Sjekk om bonden har noen å angripe (diagonalt)
-    let attackRange = [
+    let attackRange: coordinate[] = [
         {x: currentPawn.position.x + offsetModifier, y: currentPawn.position.y + offsetModifier},
         {x: currentPawn.position.x + -1 * offsetModifier, y: currentPawn.position.y + offsetModifier}
     ]
@@ -102,16 +102,16 @@ function calculateLegalMovesPawn(currentPawn) {
 
 }
 
-function calculateLegalMovesBishop(currentBishop) {
+function calculateLegalMovesBishop(currentBishop: piece): coordinate[] {
 
     return calculateFieldsDiagonals(currentBishop);
 
 }
 
-function calculateLegalMovesKnight(currentKnight) {
+function calculateLegalMovesKnight(currentKnight: piece): coordinate[] {
 
-    let legalMoves = [];
-    let possibleMoves = [
+    let legalMoves: coordinate[] = [];
+    let possibleMoves: coordinate[] = [
         {x: currentKnight.position.x + 2, y: currentKnight.position.y + 1},
         {x: currentKnight.position.x + 1, y: currentKnight.position.y + 2},
         {x: currentKnight.position.x - 1, y: currentKnight.position.y + 2},
@@ -133,7 +133,7 @@ function calculateLegalMovesKnight(currentKnight) {
     return legalMoves;
 }
 
-function calculateLegalMovesRook(currentRook) {
+function calculateLegalMovesRook(currentRook: piece): coordinate[] {
 
     let northSouth = calculateFieldsNorthSouth(currentRook);
     let eastWest = calculateFieldsEastWest(currentRook);
@@ -141,7 +141,7 @@ function calculateLegalMovesRook(currentRook) {
 
 }
 
-function calculateLegalMovesQueen(currentQueen) {
+function calculateLegalMovesQueen(currentQueen: piece): coordinate[] {
 
     let northSouth = calculateFieldsNorthSouth(currentQueen);
     let eastWest = calculateFieldsEastWest(currentQueen);
@@ -149,10 +149,10 @@ function calculateLegalMovesQueen(currentQueen) {
     return northSouth.concat(eastWest, diagonals);
 }
 
-function calculateLegalMovesKing(currentKing) {
+function calculateLegalMovesKing(currentKing: piece): coordinate[] {
 
-    let legalMoves = [];
-    let possibleMoves = [
+    let legalMoves: coordinate[] = [];
+    let possibleMoves: coordinate[] = [
         {x: currentKing.position.x, y: currentKing.position.y + 1},
         {x: currentKing.position.x + 1, y: currentKing.position.y + 1},
         {x: currentKing.position.x + 1, y: currentKing.position.y},
@@ -175,15 +175,16 @@ function calculateLegalMovesKing(currentKing) {
 
 }
 
-function calculateFieldsDiagonals(piece) {
+function calculateFieldsDiagonals(piece: piece): coordinate[] {
 
-    let legalMoves = [];
+    let legalMoves: coordinate[] = [];
 
     // North-east
     for (let i = 1; i <= 7; i++) {
-        let targetCell = {};
-        targetCell.x = piece.position.x + i;
-        targetCell.y = piece.position.y + i;
+        let targetCell: coordinate = {
+            x: piece.position.x + i,
+            y: piece.position.y + i
+        };
         if (fieldIsOccupied(targetCell) === piece.color) {
             break;
         }
@@ -195,9 +196,10 @@ function calculateFieldsDiagonals(piece) {
 
     // South-east
     for (let i = 1; i <= 7; i++) {
-        let targetCell = {};
-        targetCell.x = piece.position.x + i;
-        targetCell.y = piece.position.y - i;
+        let targetCell: coordinate = {
+            x: piece.position.x + i,
+            y: piece.position.y - i
+        };
         if (fieldIsOccupied(targetCell) === piece.color) {
             break;
         }
@@ -209,9 +211,10 @@ function calculateFieldsDiagonals(piece) {
 
     // South-west
     for (let i = 1; i <= 7; i++) {
-        let targetCell = {};
-        targetCell.x = piece.position.x - i;
-        targetCell.y = piece.position.y - i;
+        let targetCell: coordinate = {
+            x: piece.position.x - i,
+            y: piece.position.y - i
+        };
         if (fieldIsOccupied(targetCell) === piece.color) {
             break;
         }
@@ -223,9 +226,10 @@ function calculateFieldsDiagonals(piece) {
 
     // North-west
     for (let i = 1; i <= 7; i++) {
-        let targetCell = {};
-        targetCell.x = piece.position.x - i;
-        targetCell.y = piece.position.y + i;
+        let targetCell: coordinate = {
+            x: piece.position.x - i,
+            y: piece.position.y + i
+        };
         if (fieldIsOccupied(targetCell) === piece.color) {
             break;
         }
@@ -239,15 +243,16 @@ function calculateFieldsDiagonals(piece) {
 
 }
 
-function calculateFieldsNorthSouth(piece) {
+function calculateFieldsNorthSouth(piece: piece): coordinate[] {
 
-    let legalMoves = [];
+    let legalMoves: coordinate[] = [];
 
     // North
     for (let i = 1; i <= 7; i++) {
-        let targetCell = {};
-        targetCell.x = piece.position.x;
-        targetCell.y = piece.position.y + i;
+        let targetCell: coordinate = {
+            x: piece.position.x,
+            y: piece.position.y + i
+        };
         if (fieldIsOccupied(targetCell) === piece.color) {
             break;
         }
@@ -259,9 +264,10 @@ function calculateFieldsNorthSouth(piece) {
 
     // South
     for (let i = 1; i <= 7; i++) {
-        let targetCell = {};
-        targetCell.x = piece.position.x;
-        targetCell.y = piece.position.y - i;
+        let targetCell: coordinate = {
+            x: piece.position.x,
+            y: piece.position.y - i
+        };
         if (fieldIsOccupied(targetCell) === piece.color) {
             break;
         }
@@ -275,15 +281,16 @@ function calculateFieldsNorthSouth(piece) {
 
 }
 
-function calculateFieldsEastWest(piece) {
+function calculateFieldsEastWest(piece: piece): coordinate[] {
 
-    let legalMoves = [];
+    let legalMoves: coordinate[] = [];
 
     // East
     for (let i = 1; i <= 7; i++) {
-        let targetCell = {};
-        targetCell.x = piece.position.x + i;
-        targetCell.y = piece.position.y;
+        let targetCell = {
+            x: piece.position.x + i,
+            y: piece.position.y
+        };
         if (fieldIsOccupied(targetCell) === piece.color) {
             break;
         }
@@ -295,9 +302,10 @@ function calculateFieldsEastWest(piece) {
 
     // West
     for (let i = 1; i <= 7; i++) {
-        let targetCell = {};
-        targetCell.x = piece.position.x - i;
-        targetCell.y = piece.position.y;
+        let targetCell = {
+            x: piece.position.x - i,
+            y: piece.position.y
+        };
         if (fieldIsOccupied(targetCell) === piece.color) {
             break;
         }
@@ -313,7 +321,7 @@ function calculateFieldsEastWest(piece) {
 
 // Returns false if field is occupied, and piece color if occupied
 
-function fieldIsOccupied(targetCell) {
+function fieldIsOccupied(targetCell: coordinate) {
 
     let targetPiece = getPieceIndexByPosition(targetCell, piecesState);
 
@@ -325,18 +333,18 @@ function fieldIsOccupied(targetCell) {
 
 }
 
-function currentPieceCanAttack(selectedPiece, target) {
+function currentPieceCanAttack(selectedPiece: piece, target: coordinate) {
 
-    if (!piecesState[getPieceIndexByPosition(target, piecesState)]) {
-        return false;
-    }
+    const pieceIndex = getPieceIndexByPosition(target, piecesState);
 
-    let targetPiece = piecesState[getPieceIndexByPosition(target, piecesState)];
+    if (!pieceIndex) return false;
+
+    let targetPiece = piecesState[pieceIndex];
 
     return targetPiece.color !== selectedPiece.color;
 }
 
-function getPieceIndexByPosition(position, piecesState) {
+function getPieceIndexByPosition(position: coordinate, piecesState: piece[]) {
 
     for (let i = 0; i < piecesState.length; i++) {
 
@@ -346,7 +354,7 @@ function getPieceIndexByPosition(position, piecesState) {
 
     }
 
-    return false;
+    return null;
 
 }
 

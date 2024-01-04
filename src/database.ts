@@ -1,19 +1,19 @@
 import pool from './databaseConnection';
 
-async function newGameEntry(gameId, joinPin, firstPlayerId) {
+async function newGameEntry(gameId: string, joinPin: string, firstPlayerId: string) {
     const sql = `
         INSERT INTO gamestate (game_id, join_pin, white_player_id)
         VALUES (?, ?, ?)
     `;
 
-    await pool.getConnection(async (err, connection) => {
-        await connection.execute(sql, [gameId, joinPin, firstPlayerId]);
+    pool.getConnection(async (err, connection) => {
+        connection.execute(sql, [gameId, joinPin, firstPlayerId]);
         console.log(`New game (game_id = ${gameId}) added to 'gamestate' table`);
         pool.releaseConnection(connection);
     });
 }
 
-async function newPlayerEntry(playerId, gameId, color) {
+async function newPlayerEntry(playerId: string, gameId: string, color: string) {
 
     if (!playerId && !gameId) return;
 
@@ -22,13 +22,11 @@ async function newPlayerEntry(playerId, gameId, color) {
         VALUES (?, ?, ?)
     `;
 
-    await pool.promise().execute(sql, [playerId, gameId, color], (err) => {
-        if (err) throw err;
-        console.log(`New player (playerId = ${playerId}) added to 'players' table`);
-    });
+    await pool.promise().execute(sql, [playerId, gameId, color]);
+    console.log(`New player (playerId = ${playerId}) added to 'players' table`);
 }
 
-async function addBlackPlayerToGamestate(playerId, gameId) {
+async function addBlackPlayerToGamestate(playerId: string, gameId: string) {
 
     if (!playerId && !gameId) return;
 
@@ -38,12 +36,9 @@ async function addBlackPlayerToGamestate(playerId, gameId) {
         WHERE game_id = ?
     `;
 
-    await pool.promise().execute(sql, [playerId, gameId], function (err, result) {
-        if (err) throw err;
-
-        gameId = result.id;
-        console.log(`New player (playerId = ${playerId}) added to 'gamestate' table`);
-    });
+    const result = await pool.promise().execute(sql, [playerId, gameId]);
+    gameId = result.id;
+    console.log(`New player (playerId = ${playerId}) added to 'gamestate' table`);
 }
 
 async function getPlayerColor(playerId, gameId) {
