@@ -1,5 +1,6 @@
-const database = require('./database');
-const numberGen = require('./numberGenerator');
+import database from './database';
+import numberGen from './numberGenerator';
+import {turn} from "./types";
 
 function createNewGame() {
 
@@ -27,6 +28,7 @@ function createNewGame() {
 
 function getInitialPiecesState() {
 
+    // @ts-ignore
     let piecesState = getInitialPawnPositions("white").concat(getInitialPawnPositions("black"));
 
     // Bishops
@@ -123,9 +125,12 @@ function getInitialPiecesState() {
 
 }
 
-function getInitialPawnPositions(color) {
+class piece {
+}
 
-    const pawns = [];
+function getInitialPawnPositions(color: turn) {
+
+    const pawns : piece[] = [];
     let targetRow;
 
     if (color === "white") {
@@ -147,4 +152,4 @@ function getInitialPawnPositions(color) {
     return pawns;
 }
 
-module.exports = {createNewGame};
+export = {createNewGame};

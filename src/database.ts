@@ -1,19 +1,20 @@
-const pool = require('./databaseConnection.js')
+import pool from './databaseConnection';
 
-async function newGameEntry(gameId, joinPin, firstPlayerId) {
+
+async function newGameEntry(gameId: string, joinPin: string, firstPlayerId: string) {
     const sql = `
         INSERT INTO gamestate (game_id, join_pin, white_player_id)
         VALUES (?, ?, ?)
     `;
 
-    await pool.getConnection(async (err, connection) => {
-        await connection.execute(sql, [gameId, joinPin, firstPlayerId]);
+    pool.getConnection(async (err, connection) => {
+        connection.execute(sql, [gameId, joinPin, firstPlayerId]);
         console.log(`New game (game_id = ${gameId}) added to 'gamestate' table`);
         pool.releaseConnection(connection);
     });
 }
 
-async function newPlayerEntry(playerId, gameId, color) {
+async function newPlayerEntry(playerId: string, gameId: string, color: string) {
 
     if (!playerId && !gameId) return;
 
@@ -22,13 +23,11 @@ async function newPlayerEntry(playerId, gameId, color) {
         VALUES (?, ?, ?)
     `;
 
-    await pool.promise().execute(sql, [playerId, gameId, color], (err) => {
-        if (err) throw err;
-        console.log(`New player (playerId = ${playerId}) added to 'players' table`);
-    });
+    await pool.promise().execute(sql, [playerId, gameId, color]);
+    console.log(`New player (playerId = ${playerId}) added to 'players' table`);
 }
 
-async function addBlackPlayerToGamestate(playerId, gameId) {
+async function addBlackPlayerToGamestate(playerId: string, gameId: string) {
 
     if (!playerId && !gameId) return;
 
@@ -38,15 +37,11 @@ async function addBlackPlayerToGamestate(playerId, gameId) {
         WHERE game_id = ?
     `;
 
-    await pool.promise().execute(sql, [playerId, gameId], function (err, result) {
-        if (err) throw err;
-
-        gameId = result.id;
-        console.log(`New player (playerId = ${playerId}) added to 'gamestate' table`);
-    });
+    const result = await pool.promise().execute(sql, [playerId, gameId]);
+    console.log(`New player (playerId = ${playerId}) added to 'gamestate' table`);
 }
 
-async function getPlayerColor(playerId, gameId) {
+async function getPlayerColor(playerId: string, gameId: string) {
 
     if (!playerId && !gameId) return;
 
@@ -58,10 +53,11 @@ async function getPlayerColor(playerId, gameId) {
     `;
 
     const results = await pool.promise().execute(sql, [playerId, gameId]);
+    // @ts-ignore
     return results[0][0]?.color;
 }
 
-async function getGameIdByPin(pin) {
+async function getGameIdByPin(pin: string) {
 
     if (!pin) return;
 
@@ -72,10 +68,11 @@ async function getGameIdByPin(pin) {
     `;
 
     const results = await pool.promise().execute(sql, [pin]);
+    // @ts-ignore
     return results[0][0]?.game_id ?? null;
 }
 
-async function removeJoinPin(gameId) {
+async function removeJoinPin(gameId: string) {
 
     if (!gameId) return;
 
@@ -88,7 +85,7 @@ async function removeJoinPin(gameId) {
     await pool.promise().execute(sql, [gameId]);
 }
 
-async function getLatestStateTimestamp(gameId) {
+async function getLatestStateTimestamp(gameId: string) {
 
     const sql = `
         SELECT latest_update
@@ -97,10 +94,11 @@ async function getLatestStateTimestamp(gameId) {
     `;
 
     const results = await pool.promise().execute(sql, [gameId]);
+    // @ts-ignore
     return results[0][0]?.latest_update ?? null;
 }
 
-async function getCurrentState(gameId) {
+async function getCurrentState(gameId: string) {
 
     const sql = `
         SELECT pieces_state, turn, last_move
@@ -109,10 +107,11 @@ async function getCurrentState(gameId) {
     `;
 
     const results = await pool.promise().execute(sql, [gameId]);
+    // @ts-ignore
     return results[0][0] ?? null;
 }
 
-async function updateState(gameId, state) {
+async function updateState(gameId: string, state: any) {
 
     const sql = `
         UPDATE gamestate
@@ -126,7 +125,7 @@ async function updateState(gameId, state) {
     await pool.promise().execute(sql, [state.piecesState, state.turn, state.timestamp, state.lastMove ?? null, gameId]);
 }
 
-async function checkGameReady(gameId) {
+async function checkGameReady(gameId: string) {
 
     const sql = `
         SELECT black_player_id
@@ -135,10 +134,11 @@ async function checkGameReady(gameId) {
     `;
 
     const results = await pool.promise().execute(sql, [gameId]);
+    // @ts-ignore
     return (results[0][0]?.black_player_id !== null);
 }
 
-module.exports = {
+export = {
     newGameEntry,
     newPlayerEntry,
     addBlackPlayerToGamestate,

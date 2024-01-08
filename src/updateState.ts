@@ -1,16 +1,25 @@
-const database = require('./database');
-const getMoves = require('./getMoves');
+import database from './database';
+import getMoves from './getMoves';
+import {piece, coordinate, turn} from "./types";
 
-async function movePiece(request) {
+type request = {
+    gameId: string,
+    playerId: string,
+    selectedPieceIndex: number,
+    targetPosition: coordinate
+}
+
+async function movePiece(request: request) {
 
     // Handle errors
     const requestError = requestHasError(request);
     if (requestError !== null) return {error: requestError};
 
-    // Get state from database
     const {gameId, playerId, selectedPieceIndex, targetPosition} = request;
+
+    // Get state from database
     const {pieces_state: piecesStateAsJSON, turn} = await database.getCurrentState(gameId);
-    const piecesState = JSON.parse(piecesStateAsJSON);
+    const piecesState: piece[] = JSON.parse(piecesStateAsJSON);
     const selectedPiece = piecesState[selectedPieceIndex];
 
     // Return error of user cannot move
@@ -22,7 +31,7 @@ async function movePiece(request) {
     return true;
 }
 
-function requestHasError(request) {
+function requestHasError(request: request) {
     if (!request.gameId) return "Ingen gameId definert, eller ugyldig format";
     if (!request.playerId) return "Ingen playerId definert, eller ugyldig format";
     if (!Number.isInteger(request.selectedPieceIndex)) return "selectedPieceIndex er ikke definert";
@@ -30,10 +39,11 @@ function requestHasError(request) {
     return null;
 }
 
-async function doMove(gameId, turn, piecesState, selectedPiece, targetPosition) {
+async function doMove(gameId: string, turn: turn, piecesState: piece[], selectedPiece: piece, targetPosition: coordinate) {
     // If there is a piece at the target field, disable it.
-    const targetPiece = piecesState[getMoves.getPieceIndexByPosition(targetPosition, piecesState)];
-    if (targetPiece) {
+    const targetPieceIndex = getMoves.getPieceIndexByPosition(targetPosition, piecesState);
+    if (targetPieceIndex !== null) {
+        const targetPiece = piecesState[targetPieceIndex];
         targetPiece.disabled = true;
     }
 
@@ -51,20 +61,20 @@ async function doMove(gameId, turn, piecesState, selectedPiece, targetPosition) 
     });
 }
 
-async function playerCanMove(playerId, gameId, turn) {
+async function playerCanMove(playerId: string, gameId: string, turn: turn) {
     const currentPlayerColor = await database.getPlayerColor(playerId, gameId);
     return (turn === currentPlayerColor);
 }
 
-function getLatestMoveAsJson(turn, selectedPiece, targetPosition) {
+function getLatestMoveAsJson(turn: turn, selectedPiece: piece, targetPosition: coordinate) {
     const lastMove = {
         color: turn, from: {...selectedPiece.position}, to: targetPosition,
     }
     return (lastMove.from && lastMove.to) ? JSON.stringify(lastMove) : null;
 }
 
-function swapTurn(turn) {
+function swapTurn(turn: turn): turn {
     return (turn === "white") ? "black" : "white";
 }
 
-module.exports = {movePiece};
+export = {movePiece};

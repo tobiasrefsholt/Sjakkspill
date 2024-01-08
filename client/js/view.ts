@@ -1,3 +1,5 @@
+/// <reference lib="dom" />
+/// <reference lib="dom.iterable" />
 "use strict";
 
 updateView();
@@ -7,6 +9,8 @@ function updateView() {
     const currentView = model.app.currentView;
 
     const app = document.getElementById('app');
+
+    if (app === null) return;
 
     if (currentView === "activeGame") {
 
@@ -27,9 +31,9 @@ function updateView() {
             </div>
         `;
         return;
-        
+
     }
-    
+
     if (currentView === "waitingForPlayer") {
 
         app.innerHTML = waitingForPlayerHTML();
@@ -147,7 +151,7 @@ function disabledPiecesHTML(color) {
         <div class="disabled-${color}">
     `;
 
-    for (let i=0; i<disabledPiecesIndex.length; i++) {
+    for (let i = 0; i < disabledPiecesIndex.length; i++) {
         html += /*html*/`
             <div class="${pieceClass}" piece-index="${disabledPiecesIndex[i]}">
                 ${model.icons[model.piecesState.pieces[disabledPiecesIndex[i]].type]}
@@ -168,7 +172,7 @@ function boardViewHTML() {
     boardHtml += /*html*/`<div id="chess-board">`;
 
     for (let rowCount = 8; rowCount >= 1; rowCount--) {
-        let parity = (rowCount%2 === 0) ? 'even' : 'odd';
+        let parity = (rowCount % 2 === 0) ? 'even' : 'odd';
         boardHtml += boardRowView(parity, rowCount);
     }
 
@@ -188,7 +192,7 @@ function boardRowView(rowParity, rowCount) {
     }
 
     for (let colCount = 1; colCount <= 8; colCount++) {
-        let cellColor = ( (colCount+CellParityOffest) % 2 === 0 ) ? 'black' : 'white';
+        let cellColor = ((colCount + CellParityOffest) % 2 === 0) ? 'black' : 'white';
 
         // Sjekk om denne cellen er et lovlig trekk. Hvis den er det, legg til cell-legal-move klassen.
         if (model.piecesState.currentLegalMoves && model.piecesState.currentLegalMoves.some(position => position.x === colCount && position.y === rowCount)) {
@@ -197,14 +201,9 @@ function boardRowView(rowParity, rowCount) {
             `;
             continue;
         }
-        
+
         // Sjekk om forrige trekk fra motstanderen ble gjort fra/til denne cellen og gi den en egen bakgrunnsfarge.
-        if ( 
-            (model.gameState.playerColor !== model.gameState.lastMove.color) 
-            && ( (model.gameState.lastMove.from.x === colCount && model.gameState.lastMove.from.y === rowCount)
-                || (model.gameState.lastMove.to.x === colCount && model.gameState.lastMove.to.y === rowCount)
-            )
-        ) {
+        if (isLastMove(colCount, rowCount)) {
 
             html += /*html*/`
                 <div class="cell last-move" row="${rowCount}" col="${colCount}"></div>
@@ -222,18 +221,27 @@ function boardRowView(rowParity, rowCount) {
 
 }
 
+function isLastMove(colCount, rowCount) {
+    const opponentMadeLastMove = model.gameState.playerColor !== model.gameState.lastMove.color;
+    const currentCellMatchesLastMove =
+        (model.gameState.lastMove.from?.x === colCount && model.gameState.lastMove.from?.y === rowCount) ||
+        (model.gameState.lastMove.to?.x === colCount && model.gameState.lastMove.to?.y === rowCount)
+    return opponentMadeLastMove && currentCellMatchesLastMove;
+}
+
 function updatePiecesView() {
 
-    for (let i=0; i<model.piecesState.pieces.length; i++) {
+    for (let i = 0; i < model.piecesState.pieces.length; i++) {
 
         if (!model.piecesState.pieces[i].disabled) {
             let piece = model.piecesState.pieces[i];
             let icon = model.icons[piece.type];
-            let targetCell = app.querySelector(`.cell[row="${piece.position.y}"][col="${piece.position.x}"]`);
+            let targetCell = document.querySelector(`.cell[row="${piece.position.y}"][col="${piece.position.x}"]`);
+            if (targetCell === null) return;
             targetCell.innerHTML = icon;
             targetCell.classList.add(`${piece.color}-piece`);
-            targetCell.setAttribute("piece-index", i);
-            
+            targetCell.setAttribute("piece-index", i.toString());
+
             if (i === model.piecesState.selectedIndex) {
                 targetCell.classList.add("selected-piece");
             }
