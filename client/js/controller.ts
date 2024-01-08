@@ -1,15 +1,15 @@
 "use strict";
 
-setInterval( () => {
-    
+setInterval(() => {
+
     if (!model.gameState.gameId) return;
 
     if (!model.gameState.gameReady) {
         /* console.log("Pulling server: Game is not ready!"); */
         getState(true);
         return;
-    } 
-    
+    }
+
     if (model.gameState.gameReady && model.gameState.turn === model.gameState.playerColor && model.app.currentView === "activeGame") {
         /* console.log("Waiting for player to move"); */
         return;
@@ -23,17 +23,17 @@ setInterval( () => {
             updateView();
         }
     }
-    
+
 }, 1000);
 
 async function createNewGame() {
 
     const response = await fetch("/createNewGame", {
-    method: 'POST',
-    headers: {
-    'Accept': 'application/json',
-    'Content-Type': 'application/json'
-    }
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        }
     });
 
     response.json().then(data => {
@@ -75,8 +75,8 @@ async function joinGame() {
     const response = await fetch("/joinGame", {
         method: 'POST',
         headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
         },
         body: JSON.stringify(payload)
     });
@@ -119,8 +119,8 @@ async function getState(checkGameReady) {
     const response = await fetch("/getstate", {
         method: 'POST',
         headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
         },
         body: JSON.stringify(payload)
     });
@@ -155,8 +155,8 @@ async function moveToCell(targetPosition) {
     const response = await fetch("/movepiece", {
         method: 'POST',
         headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
         },
         body: JSON.stringify(payload)
     });
@@ -180,25 +180,28 @@ async function getLegalMoves(index) {
     const response = await fetch("/getmoves", {
         method: 'POST',
         headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
         },
         body: JSON.stringify(payload)
     });
 
     response.json().then(async data => {
         console.log(data);
-        if (data.error) { alert(data.error); return; }
+        if (data.error) {
+            alert(data.error);
+            return;
+        }
         model.piecesState.currentLegalMoves = data;
         updateView();
     });
-    
+
 }
 
 function selectPiece(index) {
 
     // If empty cell or enemy piece, reset variables and update view
-    if ( !index && index !== 0 || model.piecesState.pieces[index].color !== model.gameState.turn ) {
+    if (!index && index !== 0 || model.piecesState.pieces[index].color !== model.gameState.turn) {
         model.piecesState.selectedIndex = null;
         model.piecesState.currentLegalMoves = [];
         updateView();
@@ -212,10 +215,10 @@ function selectPiece(index) {
 
 function getDisabledPiecesIndex(color) {
 
-    let disabledPieces = [];
+    let disabledPieces: number[] = [];
 
     for (let i = 0; i < model.piecesState.pieces.length; i++) {
-        
+
         if (model.piecesState.pieces[i].disabled && model.piecesState.pieces[i].color === color) {
             disabledPieces.push(i);
         }
@@ -227,7 +230,7 @@ function getDisabledPiecesIndex(color) {
 }
 
 function setLocalStorage() {
-    let savedRoundsJSON = localStorage.getItem("savedRounds");
+    let savedRoundsJSON: string = localStorage.getItem("savedRounds") || "{}";
     const addToSavedRounds = {
         gameId: model.gameState.gameId,
         playerId: model.gameState.playerId,
@@ -237,7 +240,7 @@ function setLocalStorage() {
     };
 
     let savedRounds = JSON.parse(savedRoundsJSON);
-    if (savedRounds) {
+    if (savedRounds.length > 0) {
         savedRounds.unshift(addToSavedRounds);
     } else {
         savedRounds = [addToSavedRounds];
@@ -248,11 +251,11 @@ function setLocalStorage() {
 }
 
 function removeFromLocalStorage(gameIdToRemove, playerId) {
-    let savedRoundsJSON = localStorage.getItem("savedRounds");
+    let savedRoundsJSON: string = localStorage.getItem("savedRounds") || "{}";
     let savedRounds = JSON.parse(savedRoundsJSON);
-    let roundIndexToRemove = null;
+    let roundIndexToRemove: number | null = null;
 
-    for (let i=0; i < savedRounds.length; i++) {
+    for (let i = 0; i < savedRounds.length; i++) {
         let round = savedRounds[i];
         if (round.gameId === gameIdToRemove && round.playerId === playerId) {
             roundIndexToRemove = i;
@@ -261,7 +264,7 @@ function removeFromLocalStorage(gameIdToRemove, playerId) {
     }
 
     if (roundIndexToRemove === null) return;
-    
+
     console.log("roundIndexToRemove: " + roundIndexToRemove);
     savedRounds.splice(roundIndexToRemove, 1);
 
@@ -271,7 +274,7 @@ function removeFromLocalStorage(gameIdToRemove, playerId) {
     } else {
         localStorage.removeItem("savedRounds");
     }
-    
+
     updateView();
 }
 
@@ -281,7 +284,7 @@ function addEventListenersOnPieces() {
 
     document.querySelectorAll('.cell:not(.cell-legal-move)').forEach(cell => {
 
-        cell.addEventListener("mousedown", function () {
+        cell.addEventListener("mousedown", function (this: any) {
             let index = parseInt(this.getAttribute("piece-index"));
             selectPiece(index);
             // If empty cell, reset variables and update view
@@ -291,7 +294,7 @@ function addEventListenersOnPieces() {
 
     document.querySelectorAll('.cell-legal-move').forEach(cell => {
 
-        cell.addEventListener("mouseup", function () {
+        cell.addEventListener("mouseup", function (this: any) {
             let targetPosition = {x: parseInt(this.getAttribute("col")), y: parseInt(this.getAttribute("row"))};
             moveToCell(targetPosition);
         });

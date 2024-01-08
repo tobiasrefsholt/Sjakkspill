@@ -39,4 +39,4 @@ async function joinNewGame(request: request): Promise<response | { error: string
 
 }
 
-module.exports = {joinNewGame};
+export = {joinNewGame};

@@ -77,4 +77,4 @@ function swapTurn(turn: turn): turn {
     return (turn === "white") ? "black" : "white";
 }
 
-module.exports = {movePiece};
+export = {movePiece};

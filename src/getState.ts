@@ -51,4 +51,4 @@ async function getGameStateObject(request: getStateRequest) : Promise<response |
     };
 }
 
-module.exports = {getState};
+export = {getState};
