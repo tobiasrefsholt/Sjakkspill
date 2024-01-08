@@ -15,7 +15,7 @@ type response = {
     piecesState: any
 }
 
-async function getState(request: getStateRequest) {
+export async function getState(request: getStateRequest) {
 
     // Validate request
     if (!request.gameId) return {error: "Ingen gameId definert, eller ugyldig format"};
@@ -50,5 +50,3 @@ async function getGameStateObject(request: getStateRequest) : Promise<response |
         piecesState: state.pieces_state
     };
 }
-
-export = {getState};

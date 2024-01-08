@@ -2,7 +2,7 @@ import database from './database';
 import numberGen from './numberGenerator';
 import {turn} from "./types";
 
-function createNewGame() {
+export function createNewGame() {
 
     const gameId = numberGen.generateId();
     const joinPin = numberGen.generatePin();
@@ -151,5 +151,3 @@ function getInitialPawnPositions(color: turn) {
 
     return pawns;
 }
-
-export = {createNewGame};

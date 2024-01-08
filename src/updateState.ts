@@ -1,5 +1,5 @@
 import database from './database';
-import getMoves from './getMoves';
+import {getPieceIndexByPosition} from './getMoves';
 import {piece, coordinate, turn} from "./types";
 
 type request = {
@@ -9,7 +9,7 @@ type request = {
     targetPosition: coordinate
 }
 
-async function movePiece(request: request) {
+export async function movePiece(request: request) {
 
     // Handle errors
     const requestError = requestHasError(request);
@@ -41,7 +41,7 @@ function requestHasError(request: request) {
 
 async function doMove(gameId: string, turn: turn, piecesState: piece[], selectedPiece: piece, targetPosition: coordinate) {
     // If there is a piece at the target field, disable it.
-    const targetPieceIndex = getMoves.getPieceIndexByPosition(targetPosition, piecesState);
+    const targetPieceIndex = getPieceIndexByPosition(targetPosition, piecesState);
     if (targetPieceIndex !== null) {
         const targetPiece = piecesState[targetPieceIndex];
         targetPiece.disabled = true;
@@ -76,5 +76,3 @@ function getLatestMoveAsJson(turn: turn, selectedPiece: piece, targetPosition: c
 function swapTurn(turn: turn): turn {
     return (turn === "white") ? "black" : "white";
 }
-
-export = {movePiece};

@@ -1,10 +1,10 @@
 import express, {Express, Request, Response} from "express";
 import dotenv from "dotenv";
-import newGame from "./createNewGame";
-import joinGame from"./joinGame";
-import getState from"./getState";
-import getMoves from "./getMoves";
-import updateState from "./updateState";
+import {createNewGame} from "./createNewGame";
+import {joinNewGame} from "./joinGame";
+import {getState} from "./getState";
+import {currentLegalMoves} from "./getMoves";
+import {movePiece} from "./updateState";
 
 dotenv.config();
 
@@ -18,31 +18,31 @@ app.get('/', (req: Request, res: Response): void => {
 });
 
 app.post('/createNewGame', (request: Request, res): void => {
-    const apiResponse = newGame.createNewGame();
+    const apiResponse = createNewGame();
     res.header('Content-Type: application/json');
     res.end(JSON.stringify(apiResponse));
 });
 
 app.post('/joinGame', async (req: Request, res: Response) => {
-    const apiResponse = await joinGame.joinNewGame(req.body);
+    const apiResponse = await joinNewGame(req.body);
     res.header('Content-Type: application/json');
     res.end(JSON.stringify(apiResponse));
 });
 
 app.post('/getstate', async (req: Request, res: Response) => {
-    const apiResponse = await getState.getState(req.body);
+    const apiResponse = await getState(req.body);
     res.header('Content-Type: application/json');
     res.end(JSON.stringify(apiResponse));
 });
 
 app.post('/getmoves', async (req: Request, res: Response) => {
-    const apiResponse = await getMoves.currentLegalMoves(req.body);
+    const apiResponse = await currentLegalMoves(req.body);
     res.header('Content-Type: application/json');
     res.end(JSON.stringify(apiResponse));
 });
 
 app.post('/movepiece', async (req: Request, res: Response) => {
-    const apiResponse = await updateState.movePiece(req.body);
+    const apiResponse = await movePiece(req.body);
     res.header('Content-Type: application/json');
     res.end(JSON.stringify(apiResponse));
 });

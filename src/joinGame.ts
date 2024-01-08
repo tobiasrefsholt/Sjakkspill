@@ -12,7 +12,7 @@ type response = {
     playerColor: "white" | "black"
 }
 
-async function joinNewGame(request: request): Promise<response | { error: string }> {
+export async function joinNewGame(request: request): Promise<response | { error: string }> {
 
     // Returner en feilmelding hvis joinPin ikke er en INT
     if (!Number.isInteger(parseInt(request.joinPin))) return {error: "joinPin har et ugyldig format"};
@@ -36,7 +36,4 @@ async function joinNewGame(request: request): Promise<response | { error: string
         playerId,
         playerColor: "black"
     };
-
 }
-
-export = {joinNewGame};

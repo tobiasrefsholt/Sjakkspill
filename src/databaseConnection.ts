@@ -1,5 +1,4 @@
 import mysql from 'mysql2';
-
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -12,8 +11,8 @@ const pool = mysql.createPool({
     charset: process.env.db_charset
 });
 
-pool.getConnection((err,connection)=> {
-    if(err) throw err;
+pool.getConnection((err, connection) => {
+    if (err) throw err;
     console.log('Database connected successfully');
     const gamestateSql = `
         create table if not exists gamestate

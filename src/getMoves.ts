@@ -9,7 +9,7 @@ type legalMoveRequest = {
 let piecesState: piece[];
 let turn: string;
 
-async function currentLegalMoves(request: legalMoveRequest): Promise<coordinate[] | { error: string }> {
+export async function currentLegalMoves(request: legalMoveRequest): Promise<coordinate[] | { error: string }> {
 
     if (!request.gameId) return {"error": "GameId not defined"};
     if (!request.selectedPieceIndex && request.selectedPieceIndex !== 0) return {"error": "selectedPieceIndex not defined"};
@@ -344,7 +344,7 @@ function currentPieceCanAttack(selectedPiece: piece, target: coordinate) {
     return targetPiece.color !== selectedPiece.color;
 }
 
-function getPieceIndexByPosition(position: coordinate, piecesState: piece[]) {
+export function getPieceIndexByPosition(position: coordinate, piecesState: piece[]) {
 
     for (let i = 0; i < piecesState.length; i++) {
 
@@ -357,5 +357,3 @@ function getPieceIndexByPosition(position: coordinate, piecesState: piece[]) {
     return null;
 
 }
-
-export = {currentLegalMoves, getPieceIndexByPosition};
