@@ -1,5 +1,5 @@
 
-# Project Title
+# Chess
 
 Fullstack chess game where two players can play against each other. Still work in progress. [TODO list](https://github.com/tobiasrefsholt/Sjakkspill/blob/main/TODO.md).
 
