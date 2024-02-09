@@ -26,7 +26,7 @@ git clone https://github.com/tobiasrefsholt/Sjakkspill.git
 ```
 sudo mysql
 ```
-```
+```sql
 MariaDB >
 
 CREATE DATABASE database_name;
@@ -35,7 +35,7 @@ GRANT ALL PRIVILEGES ON database_name.* TO 'username'@'localhost';
 FLUSH PRIVILEGES;
 ```
 3. Copy .env.default to .env and configure db credentials and server port
-```
+```env
 # Database credentials
 db_host     = "127.0.0.1"
 db_user     = ""
